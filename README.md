@@ -32,6 +32,21 @@ vercel --prod
 
 Le build Vite est automatique via `vercel build`.
 
+## Développement local
+
+**Prérequis**
+- Node.js LTS (recommandé: `22`, voir `.nvmrc`)
+
+**Variables d'environnement**
+- `VITE_API_BASE_URL` (ex: `https://super-videotheque-api.onrender.com/api`)
+
+**Démarrage**
+```bash
+nvm use || true
+npm install
+npm run dev
+```
+
 ## Structure
 ```
 src/
