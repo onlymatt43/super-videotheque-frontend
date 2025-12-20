@@ -22,7 +22,7 @@ Ce frontend est déployé en tant que site statique sur Vercel.
 
 **Configuration requise:**
 - `vercel.json` - Rewrites pour SPA routing
-- `.env.production` - Variable `VITE_API_BASE_URL` pointant vers le backend Vercel
+- `.env.production` - Variable `VITE_API_BASE_URL` pointant vers le backend (Render)
 
 **Déploiement:**
 ```bash
@@ -47,7 +47,7 @@ src/
 
 | Nom | Description |
 | --- | --- |
-| `VITE_API_BASE_URL` | URL du backend Vercel (ex: `https://backend-j3rvyszxi-matts-projects-77a3636c.vercel.app`). |
+| `VITE_API_BASE_URL` | URL du backend (ex: `https://<ton-service>.onrender.com/api`). |
 
 ## Expérience utilisateur
 1. L'utilisateur saisit email + code Payhip → validation côté backend.

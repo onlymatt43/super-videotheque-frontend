@@ -1,6 +1,12 @@
 import axios from 'axios';
 
-const baseURL = import.meta.env.VITE_API_BASE_URL ?? 'https://backend-j3rvyszxi-matts-projects-77a3636c.vercel.app';
+const baseURL = import.meta.env.VITE_API_BASE_URL;
+
+if (!baseURL) {
+  // Avoid silently calling an old/stale backend when env vars are missing.
+  // In dev you can still set `.env.local` with VITE_API_BASE_URL.
+  throw new Error('Missing VITE_API_BASE_URL. Set it to your backend base URL (e.g. https://<render-domain>/api).');
+}
 
 export const apiClient = axios.create({
   baseURL,
