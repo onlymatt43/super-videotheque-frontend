@@ -43,22 +43,23 @@ export const LandingPage = () => {
         <div className="absolute inset-0 bg-black/40" />
       </div>
 
+      {/* AI Assistant button - outside content div */}
+      <button 
+        onClick={() => {
+          console.log('AI button clicked, opening chat');
+          setIsChatOpen(true);
+        }}
+        className="fixed top-6 right-6 z-[100] flex h-10 w-10 items-center justify-center rounded-full bg-night-light text-ember transition-all hover:bg-ember hover:text-night hover:scale-110 shadow-glow pointer-events-auto"
+        title="Assistant AI"
+      >
+        <img src="/ai-icon.png" alt="AI" className="h-6 w-6 pointer-events-none" />
+      </button>
+
+      {/* AI Chat Modal */}
+      <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
       {/* Content */}
       <div className="relative z-10">
-        {/* AI Assistant button */}
-        <button 
-          onClick={() => {
-            console.log('AI button clicked, opening chat');
-            setIsChatOpen(true);
-          }}
-          className="fixed top-6 right-6 z-[100] flex h-10 w-10 items-center justify-center rounded-full bg-night-light text-ember transition-all hover:bg-ember hover:text-night hover:scale-110 shadow-glow"
-          title="Assistant AI"
-        >
-          <img src="/ai-icon.png" alt="AI" className="h-6 w-6" />
-        </button>
-
-        {/* AI Chat Modal */}
-        <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
         <section className="flex flex-col items-center justify-center gap-6 sm:gap-10 text-center px-2 min-h-screen">
           {codes.length > 0 && (
