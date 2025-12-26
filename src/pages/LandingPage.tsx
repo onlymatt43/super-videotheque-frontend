@@ -1,15 +1,38 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { PayhipForm } from '../components/PayhipForm';
 import { PreviewCarousel } from '../components/PreviewCarousel';
 import { AIChat } from '../components/AIChat';
-import { AccessManager } from '../components/AccessManager';
 import { useSession } from '../features/session/useSession';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
-  const { codes } = useSession();
+  const { codes, customerEmail } = useSession();
   const [isChatOpen, setIsChatOpen] = useState(false);
+
+  // Calculer le temps restant pour les codes temporels
+  const timeRemaining = useMemo(() => {
+    if (codes.length === 0) return null;
+    
+    const now = Date.now();
+    const timeCodes = codes.filter(c => c.grant.type === 'time' && c.grant.expiresAt);
+    
+    if (timeCodes.length === 0) return 'Permanent';
+    
+    // Trouver le code avec le plus de temps restant
+    const longestTime = Math.max(...timeCodes.map(c => {
+      const expires = new Date(c.grant.expiresAt!).getTime();
+      return expires - now;
+    }));
+    
+    if (longestTime <= 0) return 'Expiré';
+    
+    const minutes = Math.floor(longestTime / 60000);
+    if (minutes < 60) return `${minutes} min restantes`;
+    
+    const hours = Math.floor(minutes / 60);
+    return `${hours}h restantes`;
+  }, [codes]);
 
   return (
     <div className="relative min-h-screen">
@@ -38,14 +61,15 @@ export const LandingPage = () => {
             e.currentTarget.style.display = 'none';
           }}
         />
-        
-        {/* Dark overlay for better readability */}
-        <div className="absolute inset-0 bg-black/40" />
-      </div>
-
-      {/* AI Assistant button - outside content div */}
-      <button 
-        onClick={() => {
+        customerEmail && (
+            <div className="w-full max-w-xl glass-panel rounded-2xl p-6 backdrop-blur">
+              <p className="text-white font-medium mb-1">{customerEmail}</p>
+              <p className="text-slate text-sm mb-4">{timeRemaining}</p>
+              <button
+                onClick={() => navigate('/catalog')}
+                className="w-full rounded-lg bg-ember hover:bg-yellow-400 px-4 py-2 text-sm font-semibold uppercase tracking-wider text-night shadow-glow transition"
+              >
+                Get Me In Again
           console.log('AI button clicked, opening chat');
           setIsChatOpen(true);
         }}
