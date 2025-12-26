@@ -26,20 +26,20 @@ export const LandingPage = () => {
         {/* Try video first */}
         <video
           autoPlay
-          loop{`/${selectedBackground}.mp4`} type="video/mp4" />
-        </video>
-        
-        {/* Fallback to image */}
-        <img
-          src={`/${selectedBackground}.png`}le.display = 'none';
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover"
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
           }}
         >
-          <source src="/background.mp4" type="video/mp4" />
+          <source src={`/${selectedBackground}.mp4`} type="video/mp4" />
         </video>
         
         {/* Fallback to image */}
         <img
-          src="/background.png"
+          src={`/${selectedBackground}.png`}
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           onError={(e) => {
