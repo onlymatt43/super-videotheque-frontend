@@ -6,18 +6,10 @@ import { AIChat } from '../components/AIChat';
 import { AccessManager } from '../components/AccessManager';
 import { useSession } from '../features/session/useSession';
 
-// Liste des backgrounds disponibles
-const backgrounds = ['background1', 'background2', 'background3'];
-
 export const LandingPage = () => {
   const navigate = useNavigate();
   const { codes } = useSession();
   const [isChatOpen, setIsChatOpen] = useState(false);
-  // Sélectionner un background aléatoire au chargement
-  const [selectedBackground] = useState(() => {
-    const randomIndex = Math.floor(Math.random() * backgrounds.length);
-    return backgrounds[randomIndex];
-  });
 
   return (
     <div className="relative min-h-screen">
@@ -34,12 +26,12 @@ export const LandingPage = () => {
             e.currentTarget.style.display = 'none';
           }}
         >
-          <source src={`/${selectedBackground}.mp4`} type="video/mp4" />
+          <source src="/background.mp4" type="video/mp4" />
         </video>
         
         {/* Fallback to image */}
         <img
-          src={`/${selectedBackground}.png`}
+          src="/background.png"
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           onError={(e) => {
