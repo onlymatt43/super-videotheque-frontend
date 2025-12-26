@@ -7,7 +7,7 @@ interface LayoutProps {
 }
 
 export const Layout = ({ children }: LayoutProps) => {
-  const { customerEmail, validation, clearSession } = useSession();
+  const { customerEmail, codes, clearSession } = useSession();
 
   return (
     <div className="min-h-screen bg-night text-white">
@@ -22,7 +22,7 @@ export const Layout = ({ children }: LayoutProps) => {
             <div className="flex items-center gap-2 sm:gap-4 text-sm text-slate">
               <div className="hidden sm:block text-right">
                 <p className="font-medium text-white">{customerEmail}</p>
-                {validation?.productId && <p className="text-xs text-slate">Produit #{validation.productId}</p>}
+                <p className="text-xs text-slate">{codes.length} code{codes.length > 1 ? 's' : ''} actif{codes.length > 1 ? 's' : ''}</p>
               </div>
               <button
                 type="button"

@@ -2,8 +2,7 @@ import { useSession } from '../features/session/useSession';
 import { Clock, Film, Folder, Trash2 } from 'lucide-react';
 
 export const AccessManager = () => {
-  const { codes, removeCode, getActiveAccess } = useSession();
-  const activeAccess = getActiveAccess();
+  const { codes, removeCode } = useSession();
 
   if (codes.length === 0) return null;
 

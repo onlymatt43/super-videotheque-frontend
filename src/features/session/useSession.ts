@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { PayhipValidation, AccessGrant, AccessType } from '../../types';
+import type { PayhipValidation, AccessGrant } from '../../types';
 
 interface RentalSession {
   rentalId: string;
