@@ -51,7 +51,7 @@ export const PayhipForm = () => {
           type="text"
           value={code}
           onChange={(event) => setCode(event.target.value.trim())}
-          placeholder="Clé Payhip"
+          placeholder="PAYHIP CODE"
           className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate/70 outline-none transition focus:border-ember focus:placeholder-transparent"
         />
       </div>
@@ -60,7 +60,7 @@ export const PayhipForm = () => {
           type="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          placeholder="Email utilisé avec Payhip"
+          placeholder="PAYHIP EMAIL"
           className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-slate/70 outline-none transition focus:border-ember focus:placeholder-transparent"
         />
       </div>
@@ -76,7 +76,7 @@ export const PayhipForm = () => {
             Vérification en cours
           </>
         ) : (
-          'Ajouter un accès'
+          'Get Me In'
         )}
       </button>
       {status === 'success' && <p className="mt-4 text-center text-sm text-green-400">Code ajouté avec succès !</p>}
