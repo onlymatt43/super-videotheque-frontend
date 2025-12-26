@@ -118,7 +118,7 @@ export const CatalogPage = () => {
       {/* AI Assistant button */}
       <button 
         onClick={() => setIsChatOpen(true)}
-        className="fixed top-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-110 shadow-glow"
+        className="fixed top-6 right-6 z-[100] flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-110 shadow-glow"
         title="Assistant AI"
       >
         <img src="/ai-icon.png" alt="AI Assistant" className="h-full w-full rounded-full object-cover" />
@@ -127,7 +127,7 @@ export const CatalogPage = () => {
       {/* Add Code button */}
       <button 
         onClick={() => setShowAddCode(!showAddCode)}
-        className="fixed top-6 right-20 z-50 px-4 py-2 rounded-full bg-ember text-night text-sm font-semibold uppercase tracking-wider transition-all hover:bg-yellow-400 shadow-glow"
+        className="fixed top-6 right-20 z-[100] px-4 py-2 rounded-full bg-ember text-night text-sm font-semibold uppercase tracking-wider transition-all hover:bg-yellow-400 shadow-glow"
         title="Ajouter un code"
       >
         + Code

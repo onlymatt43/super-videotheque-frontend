@@ -51,7 +51,7 @@ export const LandingPage = () => {
             console.log('AI button clicked, opening chat');
             setIsChatOpen(true);
           }}
-          className="fixed top-6 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-night-light text-ember transition-all hover:bg-ember hover:text-night hover:scale-110 shadow-glow"
+          className="fixed top-6 right-6 z-[100] flex h-10 w-10 items-center justify-center rounded-full bg-night-light text-ember transition-all hover:bg-ember hover:text-night hover:scale-110 shadow-glow"
           title="Assistant AI"
         >
           <img src="/ai-icon.png" alt="AI" className="h-6 w-6" />
