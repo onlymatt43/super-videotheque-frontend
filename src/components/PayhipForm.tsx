@@ -2,11 +2,9 @@ import { useState } from 'react';
 import { validatePayhipCode } from '../api/payhip';
 import { useSession } from '../features/session/useSession';
 import { Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
 
 export const PayhipForm = () => {
-  const navigate = useNavigate();
-  const { setValidation } = useSession();
+  const { addCode } = useSession();
   const [code, setCode] = useState('');
   const [email, setEmail] = useState('');
   const [status, setStatus] = useState<'idle' | 'loading' | 'error' | 'success'>('idle');
@@ -24,9 +22,13 @@ export const PayhipForm = () => {
       setStatus('loading');
       setError(undefined);
       const validation = await validatePayhipCode({ code });
-      setValidation({ code, email, validation });
+      addCode({ code, email, validation });
       setStatus('success');
-      navigate('/catalog');
+      // Réinitialiser le formulaire après succès
+      setTimeout(() => {
+        setCode('');
+        setStatus('idle');
+      }, 2000);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Validation Payhip impossible.';
       setError(message);
@@ -74,10 +76,10 @@ export const PayhipForm = () => {
             Vérification en cours
           </>
         ) : (
-          'Débloquer le catalogue'
+          'Ajouter un accès'
         )}
       </button>
-      {status === 'success' && <p className="mt-4 text-center text-sm text-green-400">Licence vérifiée ! Redirection vers le catalogue...</p>}
+      {status === 'success' && <p className="mt-4 text-center text-sm text-green-400">Code ajouté avec succès !</p>}
     </form>
   );
 };

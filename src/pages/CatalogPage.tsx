@@ -7,6 +7,8 @@ import { VideoModal } from '../components/VideoModal';
 import { createRental, fetchRental } from '../api/rentals';
 import { fetchCategories, type Category } from '../api/categories';
 import { AIChat } from '../components/AIChat';
+import { AccessManager } from '../components/AccessManager';
+import { PayhipForm } from '../components/PayhipForm';
 
 interface VideoState {
   open: boolean;
@@ -26,10 +28,11 @@ export const CatalogPage = () => {
   const loading = useCatalog((state) => state.loading);
   const error = useCatalog((state) => state.error);
   const fetchCatalog = useCatalog((state) => state.fetchCatalog);
-  const { payhipCode, customerEmail, rentals, upsertRental } = useSession();
+  const { customerEmail, rentals, upsertRental, hasAccess, codes } = useSession();
   const [videoState, setVideoState] = useState<VideoState>(initialState);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [showAddCode, setShowAddCode] = useState(false);
 
   useEffect(() => {
     if (!movies.length) {
@@ -48,28 +51,41 @@ export const CatalogPage = () => {
     return null;
   }, [movies]);
 
-  // Group movies by category (dynamic)
+  // Group movies by category (dynamic) and filter by access
   const moviesByCategory = useMemo(() => {
     const groups: Record<string, { label: string; movies: Movie[] }> = {};
     
     categories.forEach(cat => {
-      const catMovies = movies.filter(m => m.category === cat.slug);
+      const catMovies = movies.filter(m => {
+        if (m.category !== cat.slug) return false;
+        return hasAccess(m._id, m.category);
+      });
       if (catMovies.length > 0) {
         groups[cat.slug] = { label: cat.label, movies: catMovies };
       }
     });
     
     return groups;
-  }, [movies, categories]);
+  }, [movies, categories, hasAccess]);
 
-  // Recent movies (last 10)
-  const recentMovies = useMemo(() => movies.slice(0, 10), [movies]);
+  // Recent movies (last 10) filtered by access
+  const recentMovies = useMemo(() => 
+    movies.filter(m => hasAccess(m._id, m.category)).slice(0, 10),
+    [movies, hasAccess]
+  );
 
   const handleWatch = async (movie: Movie) => {
-    if (!payhipCode || !customerEmail) {
+    if (!hasAccess(movie._id, movie.category)) {
+      setVideoState({ open: true, loading: false, movie, error: 'Vous n\'avez pas accès à ce contenu. Ajoutez un code valide.' });
+      return;
+    }
+
+    if (!customerEmail || codes.length === 0) {
       setVideoState({ open: true, loading: false, movie, error: 'Validez votre code Payhip pour accéder à la vidéo.' });
       return;
     }
+
+    const payhipCode = codes[0]?.code; // Utiliser le premier code pour la location
 
     setVideoState({ open: true, loading: true, movie, signedUrl: undefined, error: undefined });
 
@@ -108,8 +124,35 @@ export const CatalogPage = () => {
         <img src="/ai-icon.png" alt="AI Assistant" className="h-full w-full rounded-full object-cover" />
       </button>
 
+      {/* Add Code button */}
+      <button 
+        onClick={() => setShowAddCode(!showAddCode)}
+        className="fixed top-6 right-20 z-50 px-4 py-2 rounded-full bg-ember text-night text-sm font-semibold uppercase tracking-wider transition-all hover:bg-yellow-400 shadow-glow"
+        title="Ajouter un code"
+      >
+        + Code
+      </button>
+
       {/* AI Chat Modal */}
       <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
+      {/* Access Manager */}
+      <AccessManager />
+
+      {/* Add Code Form */}
+      {showAddCode && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="relative">
+            <button
+              onClick={() => setShowAddCode(false)}
+              className="absolute -top-4 -right-4 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white"
+            >
+              ✕
+            </button>
+            <PayhipForm />
+          </div>
+        </div>
+      )}
 
       <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-black via-night to-night-light p-8">
         <div className="max-w-2xl">

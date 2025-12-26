@@ -29,6 +29,14 @@ export interface Rental {
   updatedAt: string;
 }
 
+export type AccessType = 'time' | 'film' | 'category';
+
+export interface AccessGrant {
+  type: AccessType;
+  value: string; // "all" pour time, film_id pour film, category_name pour category
+  expiresAt?: string; // Pour les accès temporels
+}
+
 export interface PayhipValidation {
   success: boolean;
   licenseKey: string;
@@ -37,6 +45,9 @@ export interface PayhipValidation {
   status?: string;
   orderId?: string;
   purchasedAt?: string;
+  accessType?: AccessType;
+  accessValue?: string;
+  duration?: number; // en secondes pour les codes temporels
 }
 
 export interface ApiResponse<T> {
