@@ -47,7 +47,10 @@ export const LandingPage = () => {
       <div className="relative z-10">
         {/* AI Assistant button */}
         <button 
-          onClick={() => setIsChatOpen(true)}
+          onClick={() => {
+            console.log('AI button clicked, opening chat');
+            setIsChatOpen(true);
+          }}
           className="fixed top-6 right-6 z-50 flex h-10 w-10 items-center justify-center rounded-full bg-night-light text-ember transition-all hover:bg-ember hover:text-night hover:scale-110 shadow-glow"
           title="Assistant AI"
         >
