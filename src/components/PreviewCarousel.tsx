@@ -23,11 +23,11 @@ const PreviewCard = ({ preview, isActive, onHover, onLeave }: PreviewCardProps) 
         setShowTitle(true);
       }, 5000);
     } else {
-      // Reset when mouse leaves
+      // Reset when mouse leaves - use timeout to avoid synchronous setState
       if (timerRef.current) {
         clearTimeout(timerRef.current);
       }
-      setShowTitle(false);
+      setTimeout(() => setShowTitle(false), 0);
     }
 
     return () => {

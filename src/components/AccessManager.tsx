@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { useSession } from '../features/session/useSession';
 import { Clock, Film, Folder, Trash2 } from 'lucide-react';
 
@@ -24,10 +25,11 @@ export const AccessManager = () => {
     }
   };
 
+  const now = useMemo(() => Date.now(), []);
+  
   const getTimeRemaining = (expiresAt?: string) => {
     if (!expiresAt) return 'Permanent';
     
-    const now = Date.now();
     const expires = new Date(expiresAt).getTime();
     const remaining = expires - now;
     
@@ -49,7 +51,7 @@ export const AccessManager = () => {
       <div className="space-y-3">
         {codes.map((codeAccess) => {
           const isExpired = codeAccess.grant.expiresAt && 
-            new Date(codeAccess.grant.expiresAt).getTime() <= Date.now();
+            new Date(codeAccess.grant.expiresAt).getTime() <= now;
           
           return (
             <div

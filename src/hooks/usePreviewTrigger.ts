@@ -10,7 +10,7 @@ export const usePreviewTrigger = (delayMs = 4000) => {
     if (inView) {
       timerRef.current = window.setTimeout(() => setReady(true), delayMs);
     } else {
-      setReady(false);
+      setTimeout(() => setReady(false), 0);
       if (timerRef.current) {
         clearTimeout(timerRef.current);
         timerRef.current = null;
