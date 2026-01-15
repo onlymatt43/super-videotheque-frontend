@@ -7,8 +7,8 @@ export interface Movie {
   slug: string;
   description?: string;
   thumbnailUrl?: string;
-  bunnyLibraryId?: string;
-  bunnyVideoId?: string;
+  bunnyLibraryId: string;      // ✅ Required (backend requires it)
+  bunnyVideoId: string;         // ✅ Required (backend requires it)
   videoPath: string;
   previewUrl?: string;
   rentalDurationHours: number;
