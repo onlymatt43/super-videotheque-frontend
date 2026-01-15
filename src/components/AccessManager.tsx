@@ -1,9 +1,20 @@
-import { useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useSession } from '../features/session/useSession';
 import { Clock, Film, Folder, Trash2 } from 'lucide-react';
 
 export const AccessManager = () => {
   const { codes, removeCode } = useSession();
+  const [now, setNow] = useState(() => Date.now());
+
+  useEffect(() => {
+    const intervalId = window.setInterval(() => {
+      setNow(Date.now());
+    }, 60_000);
+
+    return () => {
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   if (codes.length === 0) return null;
 
@@ -25,8 +36,6 @@ export const AccessManager = () => {
     }
   };
 
-  const now = useMemo(() => Date.now(), []);
-  
   const getTimeRemaining = (expiresAt?: string) => {
     if (!expiresAt) return 'Permanent';
     

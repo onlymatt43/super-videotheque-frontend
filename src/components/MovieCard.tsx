@@ -33,10 +33,13 @@ export const MovieCard = ({ movie, onWatch }: Props) => {
   useEffect(() => {
     if (shouldPreview && !isActive) {
       setPreviewing(movie._id);
-    } else if (!shouldPreview && isActive) {
+      return;
+    }
+
+    if (!shouldPreview && isActive) {
       setPreviewing(null);
     }
-  }, [shouldPreview]);
+  }, [shouldPreview, isActive, movie._id, setPreviewing]);
 
   // Detect image aspect ratio
   useEffect(() => {

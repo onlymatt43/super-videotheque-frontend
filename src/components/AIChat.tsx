@@ -78,7 +78,7 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
       };
 
       setMessages(prev => [...prev, assistantMessage]);
-    } catch (_error) {
+    } catch {
       const errorMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
