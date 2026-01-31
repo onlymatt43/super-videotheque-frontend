@@ -38,30 +38,34 @@ const PreviewCard = ({ preview, isActive, onHover, onLeave }: PreviewCardProps) 
   }, [isActive]);
 
   return (
-    <article
+    <div
+      className="relative aspect-square w-36 sm:w-44 flex-shrink-0 cursor-pointer"
       onMouseEnter={onHover}
       onMouseLeave={onLeave}
       onTouchStart={onHover}
       onTouchEnd={onLeave}
-      className={clsx(
-        'relative aspect-square w-36 sm:w-44 flex-shrink-0 cursor-pointer overflow-hidden rounded-xl sm:rounded-2xl bg-night-light poster-shadow transition-all duration-300',
-        isActive ? 'scale-105 ring-2 ring-ember' : ''
-      )}
     >
-      <img src={preview.thumbnailUrl || FALLBACK_POSTER} alt={preview.title} className="h-full w-full object-cover" loading="lazy" />
-      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-70" />
+      <article
+        className={clsx(
+          'h-full w-full overflow-hidden rounded-xl sm:rounded-2xl bg-night-light poster-shadow transition-all duration-300',
+          isActive ? 'scale-105 ring-2 ring-ember' : ''
+        )}
+      >
+        <img src={preview.thumbnailUrl || FALLBACK_POSTER} alt={preview.title} className="h-full w-full object-cover" loading="lazy" />
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-transparent opacity-70" />
 
-      {/* Title - appears after 5 seconds */}
-      <div className={clsx(
-        'absolute inset-x-0 bottom-0 p-3 transition-opacity duration-500',
-        showTitle ? 'opacity-100' : 'opacity-0'
-      )}>
-        <p className="text-sm font-semibold text-white line-clamp-1">{preview.title}</p>
-      </div>
+        {/* Title - appears after 5 seconds */}
+        <div className={clsx(
+          'absolute inset-x-0 bottom-0 p-3 transition-opacity duration-500',
+          showTitle ? 'opacity-100' : 'opacity-0'
+        )}>
+          <p className="text-sm font-semibold text-white line-clamp-1">{preview.title}</p>
+        </div>
 
-      {/* Preview video */}
-      <PreviewPlayer active={isActive} src={preview.previewUrl} />
-    </article>
+        {/* Preview video */}
+        <PreviewPlayer active={isActive} src={preview.previewUrl} />
+      </article>
+    </div>
   );
 };
 
