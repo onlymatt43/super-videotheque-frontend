@@ -1,7 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, Loader2 } from 'lucide-react';
+import { X, Send, Loader2, Clock, Film, Folder, Trash2, LogOut, Plus } from 'lucide-react';
 import clsx from 'clsx';
 import { sendChatMessage } from '../api/chat';
+import { useSession } from '../features/session/useSession';
+import { PayhipForm } from './PayhipForm';
 
 interface Message {
   id: string;
@@ -36,6 +38,8 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const { codes, customerEmail, removeCode, clearSession } = useSession();
+  const [view, setView] = useState<'chat' | 'access' | 'add' | 'logout'>('chat');
 
   useEffect(() => {
     if (isOpen) {
@@ -95,12 +99,108 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-end p-4 sm:p-6">
-      {/* Backdrop */}
-      <div 
+        {/* Quick actions */}
+        <div className="border-b border-white/10 bg-night/40 p-3 flex gap-2 justify-between">
+          <button onClick={() => setView('access')} className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 transition">
+            Mes accès
+          </button>
+          <button onClick={() => setView('add')} className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 transition">
+            <span className="inline-flex items-center gap-1"><Plus size={14}/> Ajouter un code</span>
+          </button>
+          <button onClick={() => setView('logout')} className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 transition">
+            <span className="inline-flex items-center gap-1"><LogOut size={14}/> Déconnexion</span>
+          </button>
+        </div>
+
+        {/* Content area */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+          {view === 'access' && (
+            <div className="space-y-3">
+              <div className="text-xs text-slate">Connecté: {customerEmail || '—'}</div>
+              {codes.length === 0 ? (
+                <p className="text-sm text-slate">Aucun code enregistré.</p>
+              ) : (
+                codes.map((c) => {
+                  const now = Date.now();
+                  const expiresAt = c.grant.expiresAt ? new Date(c.grant.expiresAt).getTime() : undefined;
+                  const isExpired = !!expiresAt && expiresAt <= now;
+                  const remaining = expiresAt ? Math.max(0, Math.floor((expiresAt - now) / 60000)) : undefined;
+                  const icon = c.grant.type === 'time' ? <Clock className="w-4 h-4"/> : c.grant.type === 'film' ? <Film className="w-4 h-4"/> : <Folder className="w-4 h-4"/>;
+                  const label = c.grant.type === 'time' ? 'Accès complet temporaire' : c.grant.type === 'film' ? `Film: ${c.grant.value}` : `Catégorie: ${c.grant.value}`;
+                  return (
+                    <div key={c.code} className={clsx('flex items-center justify-between rounded-lg border p-3', isExpired ? 'border-red-500/30 opacity-60' : 'border-white/10 bg-white/5')}>
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className="text-ember">{icon}</div>
+                        <div className="flex-1">
+                          <p className="text-sm text-white font-medium">{label}</p>
+                          <p className="text-xs text-slate/70">Code: {c.code.substring(0,8)}…</p>
+                        </div>
+                        <div className={clsx('text-right text-sm', isExpired ? 'text-red-400' : 'text-green-400')}>
+                          {expiresAt ? (isExpired ? 'Expiré' : `${remaining} min`) : 'Permanent'}
+                        </div>
+                      </div>
+                      <button onClick={() => removeCode(c.code)} className="ml-3 text-slate/60 hover:text-red-400"><Trash2 className="w-4 h-4"/></button>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          )}
+
+          {view === 'add' && (
+            <div>
+              <p className="mb-3 text-sm text-slate">Entre ton code Payhip et ton email pour activer l’accès.</p>
+              <PayhipForm />
+            </div>
+          )}
+
+          {view === 'logout' && (
+            <div className="space-y-3">
+              <p className="text-sm text-slate">Tu vas te déconnecter et effacer tes codes de ce navigateur.</p>
+              <div className="flex gap-2">
+                <button onClick={() => { clearSession(); setView('chat'); }} className="rounded-lg bg-red-500/80 hover:bg-red-500 px-4 py-2 text-sm text-white">Confirmer</button>
+                <button onClick={() => setView('chat')} className="rounded-lg bg-white/10 hover:bg-white/15 px-4 py-2 text-sm text-white">Annuler</button>
+              </div>
+            </div>
+          )}
+
+          {view === 'chat' && (
+            <>
+              {/* Messages */}
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={clsx(
+                    'flex',
+                    message.role === 'user' ? 'justify-end' : 'justify-start'
+                  )}
+                >
+                  <div
+                    className={clsx(
+                      'max-w-[85%] rounded-2xl px-4 py-3 text-sm',
+                      message.role === 'user'
+                        ? 'bg-ember text-night'
+                        : 'bg-white/10 text-white'
+                    )}
+                  >
+                    <p className="whitespace-pre-wrap">{message.content}</p>
+                  </div>
+                </div>
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className="rounded-2xl bg-white/10 px-4 py-3">
+                    <Loader2 className="h-5 w-5 animate-spin text-ember" />
+                  </div>
+                </div>
+              )}
+              <div ref={messagesEndRef} />
+            </>
+          )}
         className="absolute inset-0 bg-black/50 backdrop-blur-sm"
         onClick={onClose}
-      />
-      
+        {/* Input */}
+        <form onSubmit={handleSubmit} className="border-t border-white/10 p-4">
       {/* Chat window */}
       <div className="relative flex h-[500px] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-night-light shadow-2xl sm:h-[600px]">
         {/* Header */}

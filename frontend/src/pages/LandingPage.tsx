@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { PayhipForm } from '../components/PayhipForm';
 import { PreviewCarousel } from '../components/PreviewCarousel';
 import { AIChat } from '../components/AIChat';
-import { AccessManager } from '../components/AccessManager';
+// Access controls are now handled inside the AI chat modal
 import { useSession } from '../features/session/useSession';
 
 export const LandingPage = () => {
@@ -74,7 +74,6 @@ export const LandingPage = () => {
           )}
           {hasAccess && (
             <div className="w-full max-w-xl">
-              <AccessManager />
               <button
                 onClick={() => navigate('/catalog')}
                 className="w-full mt-4 rounded-xl bg-green-600 hover:bg-green-700 px-6 py-3 text-center text-base font-semibold uppercase tracking-[0.3em] text-white shadow-glow transition"
