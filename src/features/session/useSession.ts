@@ -54,7 +54,8 @@ const sanitizeGrant = (input: unknown): AccessGrant => {
 
 const sanitizeValidation = (input: unknown, code: string): PayhipValidation => {
   if (!input || typeof input !== 'object') {
-    return { success: true, licenseKey: code };
+    // Default to not validated; prevents accidental full access
+    return { success: false, licenseKey: code };
   }
 
   const record = input as Record<string, unknown>;
@@ -63,7 +64,7 @@ const sanitizeValidation = (input: unknown, code: string): PayhipValidation => {
   const accessValue = typeof record.accessValue === 'string' ? record.accessValue : undefined;
 
   return {
-    success: record.success === false ? false : true,
+    success: record.success === true,
     licenseKey: typeof record.licenseKey === 'string' && record.licenseKey.length ? record.licenseKey : code,
     productId: typeof record.productId === 'string' ? record.productId : undefined,
     email: typeof record.email === 'string' ? record.email : undefined,
@@ -82,8 +83,10 @@ const sanitizeCodeAccess = (input: unknown): CodeAccess | null => {
     return {
       code,
       email: '',
-      validation: { success: true, licenseKey: code },
-      grant: { type: 'time', value: 'all' },
+      // Mark as not validated; user must re-validate to gain access
+      validation: { success: false, licenseKey: code },
+      // Expired grant placeholder so it never yields access
+      grant: { type: 'time', value: 'all', expiresAt: new Date(0).toISOString() },
       addedAt: new Date().toISOString()
     };
   }
@@ -210,10 +213,16 @@ export const useSession = create<SessionState>()(
       getActiveAccess: () => {
         const now = Date.now();
         return sanitizeCodes(get().codes)
+          // Only consider validated codes
+          .filter((c) => c.validation?.success === true)
           .map((c) => c.grant)
           .filter((grant) => {
-            if (!grant.expiresAt) return true;
-            return new Date(grant.expiresAt).getTime() > now;
+            if (grant.type === 'time') {
+              // Time access must have a future expiry
+              return !!grant.expiresAt && new Date(grant.expiresAt).getTime() > now;
+            }
+            // Film/category grants can be permanent
+            return true;
           });
       },
 

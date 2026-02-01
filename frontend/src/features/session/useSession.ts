@@ -54,7 +54,7 @@ const sanitizeGrant = (input: unknown): AccessGrant => {
 
 const sanitizeValidation = (input: unknown, code: string): PayhipValidation => {
   if (!input || typeof input !== 'object') {
-    return { success: true, licenseKey: code };
+    return { success: false, licenseKey: code };
   }
 
   const record = input as Record<string, unknown>;
@@ -63,7 +63,7 @@ const sanitizeValidation = (input: unknown, code: string): PayhipValidation => {
   const accessValue = typeof record.accessValue === 'string' ? record.accessValue : undefined;
 
   return {
-    success: record.success === false ? false : true,
+    success: record.success === true,
     licenseKey: typeof record.licenseKey === 'string' && record.licenseKey.length ? record.licenseKey : code,
     productId: typeof record.productId === 'string' ? record.productId : undefined,
     email: typeof record.email === 'string' ? record.email : undefined,
@@ -82,8 +82,8 @@ const sanitizeCodeAccess = (input: unknown): CodeAccess | null => {
     return {
       code,
       email: '',
-      validation: { success: true, licenseKey: code },
-      grant: { type: 'time', value: 'all' },
+      validation: { success: false, licenseKey: code },
+      grant: { type: 'time', value: 'all', expiresAt: new Date(0).toISOString() },
       addedAt: new Date().toISOString()
     };
   }
@@ -210,10 +210,13 @@ export const useSession = create<SessionState>()(
       getActiveAccess: () => {
         const now = Date.now();
         return sanitizeCodes(get().codes)
+          .filter((c) => c.validation?.success === true)
           .map((c) => c.grant)
           .filter((grant) => {
-            if (!grant.expiresAt) return true;
-            return new Date(grant.expiresAt).getTime() > now;
+            if (grant.type === 'time') {
+              return !!grant.expiresAt && new Date(grant.expiresAt).getTime() > now;
+            }
+            return true;
           });
       },
 
