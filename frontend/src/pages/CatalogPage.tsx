@@ -84,8 +84,23 @@ export const CatalogPage = () => {
       setVideoState({ open: true, loading: false, movie, error: 'Validez votre code Payhip pour accéder à la vidéo.' });
       return;
     }
+    const now = Date.now();
+    const eligible = codes.find((c) => {
+      if (c.validation?.success !== true) return false;
+      const grant = c.grant;
+      if (grant.type === 'time' && grant.value === 'all') {
+        return !!grant.expiresAt && new Date(grant.expiresAt).getTime() > now;
+      }
+      if (grant.type === 'film' && grant.value === movie._id) return true;
+      if (grant.type === 'category' && grant.value === movie.category) return true;
+      return false;
+    });
 
-    const payhipCode = codes[0]?.code; // Utiliser le premier code pour la location
+    const payhipCode = eligible?.code;
+    if (!payhipCode) {
+      setVideoState({ open: true, loading: false, movie, error: 'Ce code a expiré ou ne donne pas accès à ce contenu.' });
+      return;
+    }
 
     setVideoState({ open: true, loading: true, movie, signedUrl: undefined, error: undefined });
 
