@@ -21,14 +21,13 @@ Ce frontend est déployé en tant que site statique sur Vercel.
 **URL de production:** https://frontend-p7cuqder5-matts-projects-77a3636c.vercel.app
 
 **Configuration requise:**
-- `vercel.json` - Rewrites pour SPA routing
-- `.env.production` - Variable `VITE_API_BASE_URL` pointant vers le backend (Render)
 
 **Déploiement:**
 ```bash
 cd frontend
 vercel --prod
 ```
+Deployment note (Feb 2026): Public previews are now served from the API’s DB only; no Bunny public keys in runtime. A fresh deploy ensures clients load the updated endpoint and signed URLs.
 
 Le build Vite est automatique via `vercel build`.
 
