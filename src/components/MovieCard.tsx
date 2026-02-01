@@ -31,15 +31,19 @@ export const MovieCard = ({ movie, onWatch }: Props) => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
+    // Only trigger preview if we are truly ready and not already previewing ANOTHER movie
+    // But allow setting null if we are the one currently active and lost focus
     if (shouldPreview && !isActive) {
       setPreviewing(movie._id);
-      return;
-    }
-
-    if (!shouldPreview && isActive) {
+    } else if (!shouldPreview && isActive) {
+      // Small delay before stopping to prevent flickering if just briefly scrolling
+      // But actually, let's keep it simple to break loops:
+      // If lost visibility, stop preview only if WE were the active one
       setPreviewing(null);
     }
-  }, [shouldPreview, isActive, movie._id, setPreviewing]);
+    // Removing isActive from deps to avoid loop: only react to shouldPreview changes
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shouldPreview]);
 
   // Detect image aspect ratio
   useEffect(() => {
