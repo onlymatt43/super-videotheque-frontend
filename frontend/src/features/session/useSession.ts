@@ -175,13 +175,18 @@ export const useSession = create<SessionState>()(
       ...DEFAULT_SESSION_DATA,
 
       addCode: ({ code, email, validation }) => {
-        const grant: AccessGrant = {
-          type: validation.accessType || 'time',
-          value: validation.accessValue || 'all',
-          expiresAt: validation.duration
-            ? new Date(Date.now() + validation.duration * 1000).toISOString()
-            : undefined
-        };
+        let expiresAt: string | undefined;
+        const type = validation.accessType || 'time';
+        const value = validation.accessValue || 'all';
+        if (type === 'time' && value === 'all') {
+          const purchaseMs = validation.purchasedAt ? Date.parse(validation.purchasedAt) : NaN;
+          if (Number.isFinite(purchaseMs)) {
+            expiresAt = new Date(purchaseMs + 60 * 60 * 1000).toISOString();
+          } else if (validation.duration) {
+            expiresAt = new Date(Date.now() + validation.duration * 1000).toISOString();
+          }
+        }
+        const grant: AccessGrant = { type, value, expiresAt };
 
         set((state) => {
           const existingCodes = sanitizeCodes(state.codes);
