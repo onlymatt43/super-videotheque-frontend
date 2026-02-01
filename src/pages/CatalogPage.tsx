@@ -106,20 +106,8 @@ export const CatalogPage = () => {
     setVideoState({ open: true, loading: true, movie, signedUrl: undefined, error: undefined });
 
     try {
-      const existing = rentals[movie._id];
-      const hasExistingId = !!existing?.rentalId && existing.rentalId !== 'undefined';
-
-      let envelope;
-      if (hasExistingId) {
-        try {
-          envelope = await fetchRental(existing!.rentalId);
-        } catch (_getErr) {
-          // Fallback: if GET fails (e.g., rental not found), re-create rental
-          envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
-        }
-      } else {
-        envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
-      }
+      // Always create or reuse rental on the server; it will return a fresh signed URL.
+      const envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
 
       const signedUrl = envelope.signedUrl ?? existing?.signedUrl;
       if (!signedUrl) {

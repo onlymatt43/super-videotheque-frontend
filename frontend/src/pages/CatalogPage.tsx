@@ -132,19 +132,7 @@ export const CatalogPage = () => {
     <div className="space-y-12">
       {/* AI Assistant button */}
       try {
-        const existing = rentals[movie._id];
-        const hasExistingId = !!existing?.rentalId && existing.rentalId !== 'undefined';
-
-        let envelope;
-        if (hasExistingId) {
-          try {
-            envelope = await fetchRental(existing!.rentalId);
-          } catch (_getErr) {
-            envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
-          }
-        } else {
-          envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
-        }
+        const envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
 
         const signedUrl = envelope.signedUrl ?? existing?.signedUrl;
         if (!signedUrl) {
