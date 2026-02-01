@@ -18,7 +18,10 @@ export interface Movie {
 }
 
 export interface Rental {
-  _id: string;
+  // Backend (Turso) returns `id`; older code used `_id`.
+  // Support both to keep the app resilient during migration.
+  id?: string;
+  _id?: string;
   movie: Movie | string;
   customerEmail: string;
   payhipCode: string;

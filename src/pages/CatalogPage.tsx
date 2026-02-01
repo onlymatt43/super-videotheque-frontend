@@ -100,8 +100,9 @@ export const CatalogPage = () => {
         throw new Error('Lien sécurisé momentanément indisponible.');
       }
 
+      const rentalId = (envelope.rental as any).id ?? (envelope.rental as any)._id;
       upsertRental(movie._id, {
-        rentalId: envelope.rental._id,
+        rentalId,
         signedUrl,
         expiresAt: envelope.rental.expiresAt
       });
