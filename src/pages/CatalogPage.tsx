@@ -91,9 +91,19 @@ export const CatalogPage = () => {
 
     try {
       const existing = rentals[movie._id];
-      const envelope = existing
-        ? await fetchRental(existing.rentalId)
-        : await createRental({ movieId: movie._id, customerEmail, payhipCode });
+      const hasExistingId = !!existing?.rentalId && existing.rentalId !== 'undefined';
+
+      let envelope;
+      if (hasExistingId) {
+        try {
+          envelope = await fetchRental(existing!.rentalId);
+        } catch (_getErr) {
+          // Fallback: if GET fails (e.g., rental not found), re-create rental
+          envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
+        }
+      } else {
+        envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
+      }
 
       const signedUrl = envelope.signedUrl ?? existing?.signedUrl;
       if (!signedUrl) {
@@ -101,6 +111,10 @@ export const CatalogPage = () => {
       }
 
       const rentalId = (envelope.rental as any).id ?? (envelope.rental as any)._id;
+      if (!rentalId) {
+        throw new Error('Rental not found');
+      }
+
       upsertRental(movie._id, {
         rentalId,
         signedUrl,

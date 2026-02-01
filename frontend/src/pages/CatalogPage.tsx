@@ -116,29 +116,42 @@ export const CatalogPage = () => {
   return (
     <div className="space-y-12">
       {/* AI Assistant button */}
-      <button 
-        onClick={() => setIsChatOpen(true)}
-        className="fixed top-6 right-6 z-[100] flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-110 shadow-glow"
-        title="Assistant AI"
-      >
-        <img src="/ai-icon.png" alt="AI Assistant" className="h-full w-full rounded-full object-cover" />
-      </button>
+      try {
+        const existing = rentals[movie._id];
+        const hasExistingId = !!existing?.rentalId && existing.rentalId !== 'undefined';
 
-      {/* Add Code button */}
-      <button 
-        onClick={() => setShowAddCode(!showAddCode)}
-        className="fixed top-6 right-20 z-[100] px-4 py-2 rounded-full bg-ember text-night text-sm font-semibold uppercase tracking-wider transition-all hover:bg-yellow-400 shadow-glow"
-        title="Ajouter un code"
-      >
-        + Code
-      </button>
+        let envelope;
+        if (hasExistingId) {
+          try {
+            envelope = await fetchRental(existing!.rentalId);
+          } catch (_getErr) {
+            envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
+          }
+        } else {
+          envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
+        }
 
-      {/* AI Chat Modal */}
-      <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+        const signedUrl = envelope.signedUrl ?? existing?.signedUrl;
+        if (!signedUrl) {
+          throw new Error('Lien sécurisé momentanément indisponible.');
+        }
 
-      {/* Access Manager */}
-      <AccessManager />
+        const rentalId = (envelope.rental as any).id ?? (envelope.rental as any)._id;
+        if (!rentalId) {
+          throw new Error('Rental not found');
+        }
 
+        upsertRental(movie._id, {
+          rentalId,
+          signedUrl,
+          expiresAt: envelope.rental.expiresAt
+        });
+
+        setVideoState((state) => ({ ...state, loading: false, signedUrl }));
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'Impossible de charger la vidéo.';
+        setVideoState((state) => ({ ...state, loading: false, error: message }));
+      }
       {/* Add Code Form */}
       {showAddCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
