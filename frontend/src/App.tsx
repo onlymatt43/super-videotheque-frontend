@@ -9,8 +9,9 @@ import { useSession } from './features/session/useSession';
 import { useHideCursor } from './hooks/useHideCursor';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { codes, customerEmail } = useSession();
-  if (codes.length === 0 || !customerEmail) {
+  const { getActiveAccess } = useSession();
+  const hasAccess = getActiveAccess().length > 0;
+  if (!hasAccess) {
     return <Navigate to="/" replace />;
   }
   return <>{children}</>;

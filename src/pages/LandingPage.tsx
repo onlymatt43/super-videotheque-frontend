@@ -8,7 +8,7 @@ import { useSession } from '../features/session/useSession';
 
 export const LandingPage = () => {
   const navigate = useNavigate();
-  const { codes } = useSession();
+  const { getActiveAccess } = useSession();
   const [isChatOpen, setIsChatOpen] = useState(false);
 
   return (
@@ -62,7 +62,7 @@ export const LandingPage = () => {
       <div className="relative z-10">
 
         <section className="flex flex-col items-center justify-center gap-6 sm:gap-10 text-center px-2 min-h-screen">
-          {codes.length > 0 && (
+          {getActiveAccess().length > 0 && (
             <div className="w-full max-w-xl">
               <AccessManager />
               <button
