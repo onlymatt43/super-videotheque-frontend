@@ -17,6 +17,15 @@ export const apiClient = axios.create({
   }
 });
 
+// Normalize error messages from backend (use server-provided message when available)
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    const message = error?.response?.data?.message || error?.message || 'Une erreur est survenue.';
+    return Promise.reject(new Error(message));
+  }
+);
+
 // Add admin authentication header if password is set
 const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
 if (adminPassword) {
