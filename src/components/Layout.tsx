@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Popcorn, LogOut } from 'lucide-react';
 import { useSession } from '../features/session/useSession';
 
@@ -8,9 +8,12 @@ interface LayoutProps {
 
 export const Layout = ({ children }: LayoutProps) => {
   const { customerEmail, codes, clearSession } = useSession();
+  const [searchParams] = useSearchParams();
+  const isEmbed = searchParams.get('embed') === '1';
 
   return (
     <div className="min-h-screen bg-night text-white">
+      {!isEmbed && (
       <header className="sticky top-0 z-40 bg-gradient-to-b from-black/80 to-transparent py-3 sm:py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 sm:px-4">
           <Link to="/" className="flex items-center gap-2 sm:gap-3 text-base sm:text-2xl font-bold uppercase tracking-[0.2em] sm:tracking-[0.35em] text-white">
@@ -36,7 +39,8 @@ export const Layout = ({ children }: LayoutProps) => {
           )}
         </div>
       </header>
-      <main className="mx-auto max-w-6xl px-3 sm:px-4 pb-16 pt-4 sm:pt-6">{children}</main>
+      )}
+      <main className={isEmbed ? "mx-auto max-w-6xl px-0 pb-0 pt-0" : "mx-auto max-w-6xl px-3 sm:px-4 pb-16 pt-4 sm:pt-6"}>{children}</main>
     </div>
   );
 };
