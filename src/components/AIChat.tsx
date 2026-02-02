@@ -29,19 +29,22 @@ Qu'est-ce que je peux faire pour toi ?`,
   timestamp: new Date()
 };
 
+type ChatView = 'chat' | 'access' | 'add' | 'logout' | 'survey';
 interface AIChatProps {
   isOpen: boolean;
   onClose: () => void;
+  initialView?: ChatView;
+  prefillMessage?: string;
 }
 
-export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
+export const AIChat = ({ isOpen, onClose, initialView, prefillMessage }: AIChatProps) => {
   const [messages, setMessages] = useState<Message[]>([INITIAL_MESSAGE]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { codes, customerEmail, removeCode, clearSession } = useSession();
-  const [view, setView] = useState<'chat' | 'access' | 'add' | 'logout' | 'survey'>('chat');
+  const [view, setView] = useState<ChatView>(initialView ?? 'chat');
   const navigate = useNavigate();
 
   const timeRemainingLabel = (() => {
@@ -57,21 +60,23 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus();
+      if (prefillMessage) {
+        const msg: Message = {
+          id: 'prefill-' + Date.now().toString(),
+          role: 'assistant',
+          content: prefillMessage,
+          timestamp: new Date()
+        };
+        setMessages((prev) => {
+          // Avoid duplicating the same prefill message if chat is reopened quickly
+          const already = prev.some(m => m.id.startsWith('prefill-') && m.content === prefillMessage);
+          return already ? prev : [...prev, msg];
+        });
+      }
     }
-  }, [isOpen]);
+  }, [isOpen, prefillMessage]);
 
-  // Occasionally prompt survey (~once per 3 days)
-  useEffect(() => {
-    if (!isOpen) return;
-    const key = 'survey:lastPrompt';
-    const last = localStorage.getItem(key);
-    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-    const due = !last || (Date.now() - Number(last)) > threeDaysMs;
-    if (due) {
-      setView('survey');
-      localStorage.setItem(key, String(Date.now()));
-    }
-  }, [isOpen]);
+  // No auto-appearance; survey is triggered by the landing bubble.
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -125,17 +130,42 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end justify-end p-4 sm:p-6">
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+
+      {/* Chat window */}
+      <div className="relative flex h-[500px] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-night-light shadow-2xl sm:h-[600px]">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b border-white/10 bg-night p-4">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ember text-night">
+              <span className="text-lg font-bold">?</span>
+            </div>
+            <div>
+              <h3 className="font-semibold text-white">Assistant AI</h3>
+              <p className="text-xs text-slate">Toujours là pour t'aider</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {customerEmail && (
+              <div className="hidden sm:block text-xs text-slate">
+                {customerEmail} {timeRemainingLabel ? `• ${timeRemainingLabel}` : ''}
+              </div>
+            )}
+            <button onClick={() => navigate('/privacy')} className="rounded-full p-2 text-slate transition hover:bg-white/10 hover:text-white" title="Privacy">
+              <Shield size={18} />
+            </button>
+            <button onClick={onClose} className="rounded-full p-2 text-slate transition hover:bg-white/10 hover:text-white">
+              <X size={20} />
+            </button>
+          </div>
+        </div>
+
         {/* Quick actions */}
         <div className="border-b border-white/10 bg-night/40 p-3 flex gap-2 justify-between">
-          <button onClick={() => setView('access')} className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 transition">
-            Mes accès
-          </button>
-          <button onClick={() => setView('add')} className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 transition">
-            <span className="inline-flex items-center gap-1"><Plus size={14}/> Ajouter un code</span>
-          </button>
-          <button onClick={() => setView('logout')} className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 transition">
-            <span className="inline-flex items-center gap-1"><LogOut size={14}/> Déconnexion</span>
-          </button>
+          <button onClick={() => setView('access')} className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 transition">Mes accès</button>
+          <button onClick={() => setView('add')} className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 transition"><span className="inline-flex items-center gap-1"><Plus size={14}/> Ajouter un code</span></button>
+          <button onClick={() => setView('logout')} className="flex-1 rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/15 transition"><span className="inline-flex items-center gap-1"><LogOut size={14}/> Déconnexion</span></button>
         </div>
 
         {/* Content area */}
@@ -192,23 +222,9 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
 
           {view === 'chat' && (
             <>
-              {/* Messages */}
               {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={clsx(
-                    'flex',
-                    message.role === 'user' ? 'justify-end' : 'justify-start'
-                  )}
-                >
-                  <div
-                    className={clsx(
-                      'max-w-[85%] rounded-2xl px-4 py-3 text-sm',
-                      message.role === 'user'
-                        ? 'bg-ember text-night'
-                        : 'bg-white/10 text-white'
-                    )}
-                  >
+                <div key={message.id} className={clsx('flex', message.role === 'user' ? 'justify-end' : 'justify-start')}>
+                  <div className={clsx('max-w-[85%] rounded-2xl px-4 py-3 text-sm', message.role === 'user' ? 'bg-ember text-night' : 'bg-white/10 text-white')}>
                     <p className="whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
@@ -223,98 +239,19 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
               <div ref={messagesEndRef} />
             </>
           )}
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-        {/* Input */}
-        <form onSubmit={handleSubmit} className="border-t border-white/10 p-4">
-      {/* Chat window */}
-      <div className="relative flex h-[500px] w-full max-w-md flex-col overflow-hidden rounded-2xl bg-night-light shadow-2xl sm:h-[600px]">
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-white/10 bg-night p-4">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-ember text-night">
-              <span className="text-lg font-bold">?</span>
-            </div>
-            <div>
-              <h3 className="font-semibold text-white">Assistant AI</h3>
-              <p className="text-xs text-slate">Toujours là pour t'aider</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            {customerEmail && (
-              <div className="hidden sm:block text-xs text-slate">
-                {customerEmail} {timeRemainingLabel ? `• ${timeRemainingLabel}` : ''}
-              </div>
-            )}
-            <button
-              onClick={() => navigate('/privacy')}
-              className="rounded-full p-2 text-slate transition hover:bg-white/10 hover:text-white"
-              title="Privacy"
-            >
-              <Shield size={18} />
-            </button>
-            <button
-              onClick={onClose}
-              className="rounded-full p-2 text-slate transition hover:bg-white/10 hover:text-white"
-            >
-              <X size={20} />
-            </button>
-          </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={clsx(
-                'flex',
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              )}
-            >
-              <div
-                className={clsx(
-                  'max-w-[85%] rounded-2xl px-4 py-3 text-sm',
-                  message.role === 'user'
-                    ? 'bg-ember text-night'
-                    : 'bg-white/10 text-white'
-                )}
-              >
-                <p className="whitespace-pre-wrap">{message.content}</p>
-              </div>
+        {/* Input (only for chat view) */}
+        {view === 'chat' && (
+          <form onSubmit={handleSubmit} className="border-t border-white/10 p-4">
+            <div className="flex gap-2">
+              <input ref={inputRef} type="text" value={input} onChange={(e) => setInput(e.target.value)} placeholder="Écris ton message..." className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate outline-none transition focus:border-ember" disabled={isLoading} />
+              <button type="submit" disabled={!input.trim() || isLoading} className="flex h-12 w-12 items-center justify-center rounded-xl bg-ember text-night transition hover:bg-yellow-400 disabled:opacity-50">
+                <Send size={18} />
+              </button>
             </div>
-          ))}
-          {isLoading && (
-            <div className="flex justify-start">
-              <div className="rounded-2xl bg-white/10 px-4 py-3">
-                <Loader2 className="h-5 w-5 animate-spin text-ember" />
-              </div>
-            </div>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input */}
-        <form onSubmit={handleSubmit} className="border-t border-white/10 p-4">
-          <div className="flex gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Écris ton message..."
-              className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder-slate outline-none transition focus:border-ember"
-              disabled={isLoading}
-            />
-            <button
-              type="submit"
-              disabled={!input.trim() || isLoading}
-              className="flex h-12 w-12 items-center justify-center rounded-xl bg-ember text-night transition hover:bg-yellow-400 disabled:opacity-50"
-            >
-              <Send size={18} />
-            </button>
-          </div>
-        </form>
+          </form>
+        )}
 
         {/* Survey modal content */}
         {view === 'survey' && (
@@ -326,12 +263,7 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
                 const form = e.currentTarget as HTMLFormElement;
                 const getVals = (name: string) => Array.from(form.querySelectorAll(`input[name='${name}']:checked`)).map((el: any) => el.value);
                 const frequency = (form.querySelector("select[name='frequency']") as HTMLSelectElement)?.value || undefined;
-                const answers = {
-                  genres: getVals('genres'),
-                  likeMore: getVals('more'),
-                  likeLess: getVals('less'),
-                  frequency
-                };
+                const answers = { genres: getVals('genres'), likeMore: getVals('more'), likeLess: getVals('less'), frequency };
                 try {
                   await submitSurvey({ email: customerEmail, answers });
                   setView('chat');
@@ -382,6 +314,7 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
               <div className="flex gap-2 pt-2">
                 <button type="submit" className="rounded-lg bg-ember text-night px-3 py-2">Envoyer</button>
                 <button type="button" onClick={() => setView('chat')} className="rounded-lg bg-white/10 text-white px-3 py-2">Plus tard</button>
+                <button type="button" onClick={() => { localStorage.setItem('survey:mute', 'true'); setView('chat'); }} className="rounded-lg bg-white/10 text-white px-3 py-2">Ça suffit avec les questions</button>
               </div>
             </form>
           </div>

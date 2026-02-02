@@ -10,6 +10,8 @@ export const LandingPage = () => {
   const navigate = useNavigate();
   const { getActiveAccess } = useSession();
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInitialView, setChatInitialView] = useState<'chat' | 'survey'>('chat');
+  const [showSurveyBubble, setShowSurveyBubble] = useState(false);
 
   const hasAccess = getActiveAccess().length > 0;
 
@@ -18,6 +20,14 @@ export const LandingPage = () => {
       navigate('/catalog');
     }
   }, [hasAccess, navigate]);
+
+  useEffect(() => {
+    const muted = localStorage.getItem('survey:mute') === 'true';
+    const last = localStorage.getItem('survey:lastPrompt');
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    const due = !muted && (!last || (Date.now() - Number(last)) > threeDaysMs);
+    setShowSurveyBubble(due);
+  }, []);
 
   return (
     <div className="relative min-h-screen">
@@ -51,17 +61,36 @@ export const LandingPage = () => {
       </div>
       {/* AI Chat Button: only after access */}
       {hasAccess && (
-        <button
-          onClick={() => setIsChatOpen(true)}
-          className="fixed top-6 right-6 z-[100] flex h-10 w-10 items-center justify-center rounded-full bg-night-light text-ember transition-all hover:bg-ember hover:text-night hover:scale-110 shadow-glow pointer-events-auto"
-          title="Assistant AI"
-        >
-          <img src="/ai-icon.png" alt="AI" className="h-6 w-6 pointer-events-none" />
-        </button>
+        <div className="fixed top-6 right-6 z-[100] flex items-center gap-3">
+          <button
+            onClick={() => { setChatInitialView('chat'); setIsChatOpen(true); }}
+            className={`flex h-10 w-10 items-center justify-center rounded-full bg-night-light text-ember transition-all hover:bg-ember hover:text-night hover:scale-110 shadow-glow pointer-events-auto ${showSurveyBubble ? 'ring-2 ring-ember animate-pulse' : ''}`}
+            title="Assistant AI"
+          >
+            <img src="/ai-icon.png" alt="AI" className="h-6 w-6 pointer-events-none" />
+          </button>
+          {showSurveyBubble && (
+            <div className="relative">
+              <div className="rounded-2xl bg-white/10 backdrop-blur px-3 py-2 text-xs text-white shadow-glow">
+                <span>Une petite question rapide ?</span>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={() => { setChatInitialView('survey'); setIsChatOpen(true); localStorage.setItem('survey:lastPrompt', String(Date.now())); setShowSurveyBubble(false); }}
+                    className="rounded-lg bg-ember text-night px-2 py-1"
+                  >Répondre</button>
+                  <button
+                    onClick={() => { localStorage.setItem('survey:lastPrompt', String(Date.now())); setShowSurveyBubble(false); }}
+                    className="rounded-lg bg-white/10 text-white px-2 py-1"
+                  >Plus tard</button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       )}
 
       {/* AI Chat Modal */}
-      <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} initialView={chatInitialView} />
 
       {/* Content */}
       <div className="relative z-10">

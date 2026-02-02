@@ -7,7 +7,6 @@ import { VideoModal } from '../components/VideoModal';
 import { createRental, fetchRental } from '../api/rentals';
 import { fetchCategories, type Category } from '../api/categories';
 import { AIChat } from '../components/AIChat';
-import { AccessManager } from '../components/AccessManager';
 import { PayhipForm } from '../components/PayhipForm';
 
 interface VideoState {
@@ -31,6 +30,8 @@ export const CatalogPage = () => {
   const { customerEmail, rentals, upsertRental, hasAccess, codes } = useSession();
   const [videoState, setVideoState] = useState<VideoState>(initialState);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInitialView, setChatInitialView] = useState<'chat' | 'survey'>('chat');
+  const [prefillMessage, setPrefillMessage] = useState<string | undefined>(undefined);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showAddCode, setShowAddCode] = useState(false);
 
@@ -131,30 +132,13 @@ export const CatalogPage = () => {
   return (
     <div className="space-y-12">
       {/* AI Assistant button */}
-      try {
-        const envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
-
-        const signedUrl = envelope.signedUrl ?? existing?.signedUrl;
-        if (!signedUrl) {
-          throw new Error('Lien sécurisé momentanément indisponible.');
-        }
-
-        const rentalId = (envelope.rental as any).id ?? (envelope.rental as any)._id;
-        if (!rentalId) {
-          throw new Error('Rental not found');
-        }
-
-        upsertRental(movie._id, {
-          rentalId,
-          signedUrl,
-          expiresAt: envelope.rental.expiresAt
-        });
-
-        setVideoState((state) => ({ ...state, loading: false, signedUrl }));
-      } catch (err) {
-        const message = err instanceof Error ? err.message : 'Impossible de charger la vidéo.';
-        setVideoState((state) => ({ ...state, loading: false, error: message }));
-      }
+      <button 
+        onClick={() => setIsChatOpen(true)}
+        className="fixed top-6 right-6 z-[100] flex h-12 w-12 items-center justify-center rounded-full transition-all hover:scale-110 shadow-glow"
+        title="Assistant AI"
+      >
+        <img src="/ai-icon.png" alt="AI Assistant" className="h-full w-full rounded-full object-cover" />
+      </button>
       {/* Add Code Form */}
       {showAddCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -224,7 +208,22 @@ export const CatalogPage = () => {
         isLoading={videoState.loading}
         error={videoState.error}
         onOpenChange={(open) => (!open ? setVideoState(initialState) : setVideoState((state) => ({ ...state, open })))}
+        onStart={() => {
+          if (videoState.movie) {
+            const m = videoState.movie;
+            const meta = `ℹ️ Infos du film\nTitre: ${m.title}\nCatégorie: ${m.category}${m.description ? `\nRésumé: ${m.description}` : ''}`;
+            setPrefillMessage(meta);
+            setChatInitialView('chat');
+            setIsChatOpen(true);
+          }
+        }}
+        onEnd={() => {
+          setPrefillMessage(undefined);
+          setChatInitialView('survey');
+          setIsChatOpen(true);
+        }}
       />
+      <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} initialView={chatInitialView} prefillMessage={prefillMessage} />
     </div>
   );
 };

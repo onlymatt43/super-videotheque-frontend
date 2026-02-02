@@ -10,9 +10,11 @@ interface VideoModalProps {
   onOpenChange: (open: boolean) => void;
   isLoading?: boolean;
   error?: string;
+  onStart?: () => void;
+  onEnd?: () => void;
 }
 
-export const VideoModal = ({ open, movie, signedUrl, onOpenChange, isLoading, error }: VideoModalProps) => (
+export const VideoModal = ({ open, movie, signedUrl, onOpenChange, isLoading, error, onStart, onEnd }: VideoModalProps) => (
   <Dialog.Root open={open} onOpenChange={onOpenChange}>
     <Dialog.Portal>
       <Dialog.Overlay className="fixed inset-0 bg-black/80 backdrop-blur" />
@@ -26,7 +28,9 @@ export const VideoModal = ({ open, movie, signedUrl, onOpenChange, isLoading, er
           </div>
           {isLoading && <p className="text-center text-slate">Préparation du flux sécurisé...</p>}
           {error && <p className="text-center text-red-400">{error}</p>}
-          {!isLoading && signedUrl && movie && <VideoPlayer title={movie.title} src={signedUrl} />}
+          {!isLoading && signedUrl && movie && (
+            <VideoPlayer title={movie.title} src={signedUrl} onStart={onStart} onEnd={onEnd} />
+          )}
         </div>
       </Dialog.Content>
     </Dialog.Portal>

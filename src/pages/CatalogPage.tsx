@@ -4,7 +4,7 @@ import { useCatalog } from '../features/catalog/useCatalog';
 import { useSession } from '../features/session/useSession';
 import type { Movie } from '../types';
 import { VideoModal } from '../components/VideoModal';
-import { createRental, fetchRental } from '../api/rentals';
+import { createRental } from '../api/rentals';
 import { fetchCategories, type Category } from '../api/categories';
 import { AIChat } from '../components/AIChat';
 import { AccessManager } from '../components/AccessManager';
@@ -28,9 +28,11 @@ export const CatalogPage = () => {
   const loading = useCatalog((state) => state.loading);
   const error = useCatalog((state) => state.error);
   const fetchCatalog = useCatalog((state) => state.fetchCatalog);
-  const { customerEmail, rentals, upsertRental, hasAccess, codes } = useSession();
+  const { customerEmail, upsertRental, hasAccess, codes } = useSession();
   const [videoState, setVideoState] = useState<VideoState>(initialState);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInitialView, setChatInitialView] = useState<'chat' | 'survey'>('chat');
+  const [prefillMessage, setPrefillMessage] = useState<string | undefined>(undefined);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showAddCode, setShowAddCode] = useState(false);
 
@@ -109,7 +111,7 @@ export const CatalogPage = () => {
       // Always create or reuse rental on the server; it will return a fresh signed URL.
       const envelope = await createRental({ movieId: movie._id, customerEmail, payhipCode });
 
-      const signedUrl = envelope.signedUrl ?? existing?.signedUrl;
+      const signedUrl = envelope.signedUrl;
       if (!signedUrl) {
         throw new Error('Lien sécurisé momentanément indisponible.');
       }
@@ -153,7 +155,7 @@ export const CatalogPage = () => {
       </button>
 
       {/* AI Chat Modal */}
-      <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+      <AIChat isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} initialView={chatInitialView} prefillMessage={prefillMessage} />
 
       {/* Access Manager */}
       <AccessManager />
@@ -227,6 +229,20 @@ export const CatalogPage = () => {
         isLoading={videoState.loading}
         error={videoState.error}
         onOpenChange={(open) => (!open ? setVideoState(initialState) : setVideoState((state) => ({ ...state, open })))}
+        onStart={() => {
+          if (videoState.movie) {
+            const m = videoState.movie;
+            const meta = `ℹ️ Infos du film\nTitre: ${m.title}\nCatégorie: ${m.category}${m.description ? `\nRésumé: ${m.description}` : ''}`;
+            setPrefillMessage(meta);
+            setChatInitialView('chat');
+            setIsChatOpen(true);
+          }
+        }}
+        onEnd={() => {
+          setPrefillMessage(undefined);
+          setChatInitialView('survey');
+          setIsChatOpen(true);
+        }}
       />
     </div>
   );
