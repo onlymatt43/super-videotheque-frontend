@@ -2,6 +2,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { CatalogPage } from './pages/CatalogPage';
 import { QuestionsPage } from './pages/QuestionsPage';
+import { PrivacyPage } from './pages/PrivacyPage';
 import { AdminPage } from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
 import { Layout } from './components/Layout';
@@ -33,6 +34,7 @@ const App = () => {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/questions" element={<QuestionsPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/admin"
