@@ -1,9 +1,10 @@
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, Loader2, Clock, Film, Folder, Trash2, LogOut, Plus, Shield } from 'lucide-react';
+import { X, Send, Loader2, Clock, Film, Folder, Trash2, LogOut, Plus, Shield, Sparkles } from 'lucide-react';
 import clsx from 'clsx';
 import { sendChatMessage } from '../api/chat';
 import { useSession } from '../features/session/useSession';
 import { useNavigate } from 'react-router-dom';
+import { submitSurvey } from '../api/analytics';
 import { PayhipForm } from './PayhipForm';
 
 interface Message {
@@ -40,7 +41,7 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const { codes, customerEmail, removeCode, clearSession } = useSession();
-  const [view, setView] = useState<'chat' | 'access' | 'add' | 'logout'>('chat');
+  const [view, setView] = useState<'chat' | 'access' | 'add' | 'logout' | 'survey'>('chat');
   const navigate = useNavigate();
 
   const timeRemainingLabel = (() => {
@@ -56,6 +57,19 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
   useEffect(() => {
     if (isOpen) {
       inputRef.current?.focus();
+    }
+  }, [isOpen]);
+
+  // Occasionally prompt survey (~once per 3 days)
+  useEffect(() => {
+    if (!isOpen) return;
+    const key = 'survey:lastPrompt';
+    const last = localStorage.getItem(key);
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    const due = !last || (Date.now() - Number(last)) > threeDaysMs;
+    if (due) {
+      setView('survey');
+      localStorage.setItem(key, String(Date.now()));
     }
   }, [isOpen]);
 
@@ -301,6 +315,77 @@ export const AIChat = ({ isOpen, onClose }: AIChatProps) => {
             </button>
           </div>
         </form>
+
+        {/* Survey modal content */}
+        {view === 'survey' && (
+          <div className="absolute inset-x-4 bottom-24 rounded-xl border border-white/10 bg-night/90 p-4 shadow-glow">
+            <div className="flex items-center gap-2 mb-2 text-white"><Sparkles size={16}/> <span className="text-sm font-semibold">Dis-nous ce que tu aimes</span></div>
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const form = e.currentTarget as HTMLFormElement;
+                const getVals = (name: string) => Array.from(form.querySelectorAll(`input[name='${name}']:checked`)).map((el: any) => el.value);
+                const frequency = (form.querySelector("select[name='frequency']") as HTMLSelectElement)?.value || undefined;
+                const answers = {
+                  genres: getVals('genres'),
+                  likeMore: getVals('more'),
+                  likeLess: getVals('less'),
+                  frequency
+                };
+                try {
+                  await submitSurvey({ email: customerEmail, answers });
+                  setView('chat');
+                } catch {
+                  setView('chat');
+                }
+              }}
+              className="space-y-3 text-sm text-slate"
+            >
+              <div>
+                <p className="text-white mb-1">Genres préférés</p>
+                <div className="flex flex-wrap gap-2">
+                  {['drame','comédie','thriller','documentaire'].map(g => (
+                    <label key={g} className="inline-flex items-center gap-1">
+                      <input type="checkbox" name="genres" value={g} className="accent-ember"/> <span className="capitalize">{g}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-white mb-1">Voir plus de…</p>
+                <div className="flex flex-wrap gap-2">
+                  {['actions','romance','humour','slow-burn'].map(g => (
+                    <label key={g} className="inline-flex items-center gap-1">
+                      <input type="checkbox" name="more" value={g} className="accent-ember"/> <span className="capitalize">{g}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-white mb-1">Voir moins de…</p>
+                <div className="flex flex-wrap gap-2">
+                  {['violence','langage','lenteur','spoilers'].map(g => (
+                    <label key={g} className="inline-flex items-center gap-1">
+                      <input type="checkbox" name="less" value={g} className="accent-ember"/> <span className="capitalize">{g}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-white mb-1">Fréquence des suggestions</p>
+                <select name="frequency" className="rounded-lg bg-white/5 border border-white/10 px-3 py-2 text-white">
+                  <option value="rarement">Rarement</option>
+                  <option value="parfois">Parfois</option>
+                  <option value="souvent">Souvent</option>
+                </select>
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button type="submit" className="rounded-lg bg-ember text-night px-3 py-2">Envoyer</button>
+                <button type="button" onClick={() => setView('chat')} className="rounded-lg bg-white/10 text-white px-3 py-2">Plus tard</button>
+              </div>
+            </form>
+          </div>
+        )}
       </div>
     </div>
   );
