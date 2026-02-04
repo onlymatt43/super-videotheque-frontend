@@ -12,7 +12,7 @@ export const Layout = ({ children }: LayoutProps) => {
   const isEmbed = searchParams.get('embed') === '1';
 
   return (
-    <div className="min-h-screen bg-night text-white">
+    <div className={isEmbed ? "min-h-[100svh] bg-night text-white" : "min-h-screen bg-night text-white"}>
       {!isEmbed && (
       <header className="sticky top-0 z-40 bg-gradient-to-b from-black/80 to-transparent py-3 sm:py-4">
         <div className="mx-auto flex max-w-6xl items-center justify-between px-3 sm:px-4">
