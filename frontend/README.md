@@ -32,6 +32,8 @@ vercel --prod
 
 Le build Vite est automatique via `vercel build`.
 
+Note (Feb 2026): embed mobile optimisé (`?embed=1` + `100svh`). Si le projet Vercel est connecté au repo GitHub, chaque push déclenche un redeploy automatique.
+
 ## Développement local
 
 **Prérequis**
