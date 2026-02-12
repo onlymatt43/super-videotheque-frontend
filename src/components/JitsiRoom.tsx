@@ -1,4 +1,3 @@
-import React from 'react';
 import { JitsiMeeting } from '@jitsi/react-sdk';
 
 const JitsiRoom = ({ roomName, userName }: { roomName: string, userName: string }) => {
@@ -20,7 +19,7 @@ const JitsiRoom = ({ roomName, userName }: { roomName: string, userName: string 
           displayName: userName,
           email: '' 
         }}
-        onApiReady={(externalApi) => {
+        onApiReady={() => {
           // Ici tu peux contrôler la réunion (ex: couper tous les micros)
           console.log("Jitsi est prêt !");
         }}

@@ -45,14 +45,14 @@ export const CatalogPage = () => {
   }, [movies.length, fetchCatalog]);
 
   // Featured movie: random from "soon" category or placeholder
-  const featured = useMemo(() => {
-    const soonMovies = movies.filter(m => m.category === 'soon');
-    if (soonMovies.length > 0) {
-      return soonMovies[Math.floor(Math.random() * soonMovies.length)];
-    }
-    // Return placeholder when no "soon" movies exist
-    return null;
-  }, [movies]);
+  // const featured = useMemo(() => {
+  //   const soonMovies = movies.filter(m => m.category === 'soon');
+  //   if (soonMovies.length > 0) {
+  //     return soonMovies[Math.floor(Math.random() * soonMovies.length)];
+  //   }
+  //   // Return placeholder when no "soon" movies exist
+  //   return null;
+  // }, [movies]);
 
   // Group movies by category (dynamic) and filter by access
   const moviesByCategory = useMemo(() => {
