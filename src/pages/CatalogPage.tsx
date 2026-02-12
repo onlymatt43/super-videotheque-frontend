@@ -9,6 +9,7 @@ import { fetchCategories, type Category } from '../api/categories';
 import { AIChat } from '../components/AIChat';
 import { AccessManager } from '../components/AccessManager';
 import { PayhipForm } from '../components/PayhipForm';
+import JitsiRoom from '../components/JitsiRoom';
 
 interface VideoState {
   open: boolean;
@@ -175,33 +176,8 @@ export const CatalogPage = () => {
         </div>
       )}
 
-      <section className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-black via-night to-night-light p-8">
-        <div className="max-w-2xl">
-          <p className="mb-3 text-xs uppercase tracking-[0.4em] text-ember">SOON</p>
-          {featured ? (
-            <>
-              <h1 className="font-display text-5xl uppercase tracking-[0.2em] text-white">{featured.title}</h1>
-              <p className="mt-4 text-slate">{featured.description}</p>
-              <button
-                type="button"
-                className="mt-6 inline-flex items-center gap-3 rounded-full bg-ember px-6 py-3 text-sm font-semibold uppercase tracking-[0.3em] text-night shadow-glow transition hover:bg-yellow-400"
-                onClick={() => handleWatch(featured)}
-              >
-                Regarder maintenant
-              </button>
-            </>
-          ) : (
-            <>
-              <h1 className="font-display text-5xl uppercase tracking-[0.2em] text-white">Bientôt disponible</h1>
-              <p className="mt-4 text-slate">De nouvelles vidéos arrivent très prochainement...</p>
-            </>
-          )}
-        </div>
-        <img
-          src={featured?.thumbnailUrl || '/soon-placeholder.png'}
-          alt={featured?.title || 'Coming Soon'}
-          className="absolute inset-y-0 right-0 hidden h-full w-1/2 object-cover opacity-50 lg:block"
-        />
+      <section className="relative overflow-hidden rounded-3xl bg-black/50 backdrop-blur-sm p-4 border border-white/10" style={{ minHeight: '800px' }}>
+        <JitsiRoom roomName="SuperVideothequeLiveRoom" userName={customerEmail || 'Invité'} />
       </section>
 
       {loading && <p className="text-center text-slate">Chargement du catalogue...</p>}
