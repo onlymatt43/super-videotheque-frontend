@@ -177,7 +177,7 @@ export const CatalogPage = () => {
       )}
 
       <section className="relative overflow-hidden rounded-3xl bg-black/50 backdrop-blur-sm p-4 border border-white/10" style={{ minHeight: '800px' }}>
-        <JitsiRoom roomName="Session-Coaching-OM43" userName={customerEmail || 'Invité'} />
+        <JitsiRoom roomName="NO ZOOM ROOM" userName="ONLYMATT" />
       </section>
 
       {loading && <p className="text-center text-slate">Chargement du catalogue...</p>}
