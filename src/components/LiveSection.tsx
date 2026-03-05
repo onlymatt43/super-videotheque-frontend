@@ -6,12 +6,13 @@ const HLS_URL = 'https://meet.onlymatt.ca/hls/test.m3u8';
 const CHECK_INTERVAL = 3000; // vérifier toutes les 3 secondes
 
 interface LiveSectionProps {
-  fallbackSrc?: string; // URL vidéo de remplacement quand pas de live
+  fallbackSrc?: string;
 }
 
 const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
   const [isLive, setIsLive] = useState(false);
   const [showJitsi, setShowJitsi] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
@@ -55,8 +56,18 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         video.play().catch(() => {});
       });
+      // Rester au live edge lors d'une erreur de buffer
+      hls.on(Hls.Events.ERROR, (_event, data) => {
+        if (data.fatal) {
+          hls.stopLoad();
+          hls.detachMedia();
+          hls.attachMedia(video);
+          hls.loadSource(HLS_URL);
+        } else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) {
+          hls.recoverMediaError();
+        }
+      });
     } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-      // Safari — HLS natif
       video.src = HLS_URL;
       video.play().catch(() => {});
     }
@@ -67,6 +78,23 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
       }
     };
   }, [isLive]);
+
+  const togglePlay = () => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.paused) {
+      // Sauter au live edge avant de reprendre
+      if (hlsRef.current) {
+        const levels = hlsRef.current.liveSyncPosition;
+        if (levels) video.currentTime = levels;
+      }
+      video.play().catch(() => {});
+      setIsPaused(false);
+    } else {
+      video.pause();
+      setIsPaused(true);
+    }
+  };
 
   return (
     <section className="relative overflow-hidden rounded-3xl bg-black/50 backdrop-blur-sm border border-white/10">
@@ -96,13 +124,28 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
 
       {/* Zone vidéo */}
       <div className="relative aspect-video w-full bg-black">
-        {isLive ? (
-          <video
-            ref={videoRef}
-            controls
-            playsInline
-            className="h-full w-full"
-          />
+      {isLive ? (
+          <div className="relative h-full w-full group">
+            <video
+              ref={videoRef}
+              playsInline
+              className="h-full w-full"
+            />
+            {/* Contrôles custom — juste play/pause, pas de seekbar */}
+            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                onClick={togglePlay}
+                className="w-16 h-16 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white text-2xl transition-all"
+              >
+                {isPaused ? '▶' : '⏸'}
+              </button>
+            </div>
+            {isPaused && (
+              <div className="absolute bottom-4 left-4 bg-black/70 text-yellow-400 text-xs px-3 py-1 rounded-full">
+                En pause — le live continue sans vous
+              </div>
+            )}
+          </div>
         ) : fallbackSrc ? (
           fallbackSrc.includes('iframe.mediadelivery.net') || fallbackSrc.includes('youtube') || fallbackSrc.includes('youtu.be') ? (
             <iframe
