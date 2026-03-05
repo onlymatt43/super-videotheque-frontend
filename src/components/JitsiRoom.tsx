@@ -4,7 +4,7 @@ const JitsiRoom = ({ roomName, userName }: { roomName: string, userName: string 
   return (
     <div style={{ height: '800px', width: '100%' }}>
       <JitsiMeeting
-        domain="meet.onlymatt.ca"
+        domain="meet.jit.si"
         roomName={roomName}
         configOverwrite={{
           startWithAudioMuted: true,
