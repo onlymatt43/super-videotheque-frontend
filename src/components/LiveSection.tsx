@@ -3,7 +3,7 @@ import Hls from 'hls.js';
 import JitsiRoom from './JitsiRoom';
 
 const HLS_URL = 'https://meet.onlymatt.ca/hls/test.m3u8';
-const CHECK_INTERVAL = 10000; // vérifier toutes les 10 secondes
+const CHECK_INTERVAL = 3000; // vérifier toutes les 3 secondes
 
 interface LiveSectionProps {
   fallbackSrc?: string; // URL vidéo de remplacement quand pas de live
@@ -41,7 +41,11 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
       return;
     }
     if (Hls.isSupported()) {
-      const hls = new Hls({ lowLatencyMode: true });
+      const hls = new Hls({ 
+        lowLatencyMode: true,
+        backBufferLength: 0,
+        maxLiveSyncPlaybackRate: 1.5,
+      });
       hlsRef.current = hls;
       hls.loadSource(HLS_URL);
       hls.attachMedia(video);
