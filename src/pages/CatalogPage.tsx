@@ -9,7 +9,7 @@ import { fetchCategories, type Category } from '../api/categories';
 import { AIChat } from '../components/AIChat';
 import { AccessManager } from '../components/AccessManager';
 import { PayhipForm } from '../components/PayhipForm';
-import JitsiRoom from '../components/JitsiRoom';
+import LiveSection from '../components/LiveSection';
 
 interface VideoState {
   open: boolean;
@@ -176,9 +176,7 @@ export const CatalogPage = () => {
         </div>
       )}
 
-      <section className="relative overflow-hidden rounded-3xl bg-black/50 backdrop-blur-sm p-4 border border-white/10" style={{ minHeight: '800px' }}>
-        <JitsiRoom roomName="NO ZOOM ROOM" userName="ONLYMATT" />
-      </section>
+      <LiveSection />
 
       {loading && <p className="text-center text-slate">Chargement du catalogue...</p>}
       {error && <p className="text-center text-red-400">{error}</p>}
