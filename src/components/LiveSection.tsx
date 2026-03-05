@@ -45,6 +45,9 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
         lowLatencyMode: true,
         backBufferLength: 0,
         maxLiveSyncPlaybackRate: 1.5,
+        liveSyncDurationCount: 2,
+        liveMaxLatencyDurationCount: 4,
+        initialLiveManifestSize: 1,
       });
       hlsRef.current = hls;
       hls.loadSource(HLS_URL);
