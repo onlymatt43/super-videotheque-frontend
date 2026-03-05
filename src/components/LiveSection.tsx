@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
 import JitsiRoom from './JitsiRoom';
 
-const HLS_URL = 'http://187.77.21.119:8080/hls/test.m3u8';
+const HLS_URL = 'https://meet.onlymatt.ca/hls/test.m3u8';
 const CHECK_INTERVAL = 10000; // vérifier toutes les 10 secondes
 
 interface LiveSectionProps {
