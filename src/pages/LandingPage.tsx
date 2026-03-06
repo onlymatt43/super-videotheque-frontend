@@ -33,7 +33,7 @@ export const LandingPage = () => {
     <div className="relative min-h-screen">
       {/* Background image or video */}
       <div className="fixed inset-0 z-0">
-        {/* Try video first */}
+        {/* Try video first, fallback to image on error */}
         <video
           autoPlay
           loop
@@ -42,19 +42,19 @@ export const LandingPage = () => {
           className="absolute inset-0 w-full h-full object-cover"
           onError={(e) => {
             e.currentTarget.style.display = 'none';
+            const img = e.currentTarget.nextElementSibling as HTMLImageElement | null;
+            if (img) img.style.display = 'block';
           }}
         >
           <source src="/background.mp4" type="video/mp4" />
         </video>
         
-        {/* Fallback to image */}
+        {/* Fallback image — hidden by default, shown only if video fails */}
         <img
           src="/background.png"
           alt=""
+          style={{ display: 'none' }}
           className="absolute inset-0 w-full h-full object-cover"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }}
         />
         
         {/* Overlay gradient */}
