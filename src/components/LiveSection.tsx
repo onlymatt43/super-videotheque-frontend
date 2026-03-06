@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
 import { apiClient } from '../api/client';
-import JitsiRoom from './JitsiRoom';
 
 const HLS_URL = import.meta.env.VITE_LIVE_HLS_URL ?? 'https://meet.onlymatt.ca/hls/test.m3u8';
 const LIVE_STATUS_ENDPOINT = '/api/live';
@@ -13,10 +12,6 @@ interface LiveSectionProps {
 
 const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
   const [isLive, setIsLive] = useState(false);
-  const [showJitsi, setShowJitsi] = useState(false);
-  const [showNamePrompt, setShowNamePrompt] = useState(false);
-  const [alias, setAlias] = useState('');
-  const [pendingAlias, setPendingAlias] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
@@ -108,20 +103,7 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
   }, [isLive]);
 
   const handleJoinClick = () => {
-    if (alias) {
-      // Déjà un alias — rejoindre directement
-      setShowJitsi(true);
-    } else {
-      setShowNamePrompt(true);
-    }
-  };
-
-  const handleConfirmAlias = () => {
-    const name = pendingAlias.trim();
-    if (!name) return;
-    setAlias(`ONLY ${name}`);
-    setShowNamePrompt(false);
-    setShowJitsi(true);
+    window.open('https://meet.jit.si/onlymatt-live', '_blank');
   };
 
   return (
@@ -143,55 +125,16 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
           )}
         </div>
         <div className="flex items-center gap-2">
-          {showJitsi ? (
-            <button
-              onClick={() => setShowJitsi(false)}
-              className="px-4 py-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400 text-sm font-medium transition-all"
-            >
-              ✕ Quitter la salle
-            </button>
-          ) : isLive ? (
+          {isLive && (
             <button
               onClick={handleJoinClick}
               className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all"
             >
               🎥 Rejoindre la salle
             </button>
-          ) : null}
+          )}
         </div>
       </div>
-
-      {/* Prompt nom */}
-      {showNamePrompt && (
-        <div className="p-4 border-b border-white/10 bg-white/5">
-          <p className="text-white/80 text-sm mb-3">Ton prénom pour la salle :</p>
-          <div className="flex gap-2 items-center">
-            <span className="text-white/50 text-sm shrink-0">ONLY</span>
-            <input
-              autoFocus
-              type="text"
-              value={pendingAlias}
-              onChange={(e) => setPendingAlias(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleConfirmAlias()}
-              placeholder="Mathieu"
-              className="flex-1 bg-white/10 text-white rounded-lg px-3 py-2 text-sm outline-none border border-white/20 focus:border-white/50 placeholder:text-white/30"
-            />
-            <button
-              onClick={handleConfirmAlias}
-              disabled={!pendingAlias.trim()}
-              className="px-4 py-2 rounded-lg bg-ember text-night text-sm font-semibold disabled:opacity-40 transition-all"
-            >
-              Entrer
-            </button>
-            <button
-              onClick={() => setShowNamePrompt(false)}
-              className="px-3 py-2 rounded-lg bg-white/10 text-white/60 text-sm transition-all hover:bg-white/20"
-            >
-              Annuler
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Zone vidéo */}
       <div className="relative aspect-video w-full bg-black">
@@ -235,19 +178,6 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
           )
         )}
       </div>
-
-      {/* Salle Jitsi — sous le stream */}
-      {showJitsi && (
-        <div className="border-t border-white/10">
-          <div className="p-3 bg-white/5 flex items-center justify-between">
-            <span className="text-white/60 text-xs">Salle interactive — {alias}</span>
-            <span className="text-white/40 text-xs">Caméra/micro contrôlés dans la salle</span>
-          </div>
-          <div style={{ height: '480px' }}>
-            <JitsiRoom roomName="onlymatt-live" userName={alias} />
-          </div>
-        </div>
-      )}
 
     </section>
   );
