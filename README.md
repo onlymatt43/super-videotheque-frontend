@@ -6,7 +6,7 @@ Interface React + TypeScript + Vite, mobile-first et inspirée de Netflix pour p
 - Landing page sombre avec formulaire de validation Payhip + email.
 - Catalogue horizontal avec affiches, cartes glassmorphism et hover states.
 - Auto-play d'un aperçu vidéo 4 secondes après l'apparition d'une carte (IntersectionObserver + hook custom).
-- **Section Live** (`LiveSection.tsx`) : poll `GET /api/live` toutes les 3s, affiche le player HLS (hls.js) automatiquement quand un stream OBS est actif (~6s de latence).
+- **Section Live** (`LiveSection.tsx`) : poll `GET /api/live` toutes les 3s, affiche le player HLS (hls.js) automatiquement quand un stream OBS est actif (~6s de latence). Quand le stream est actif, un bouton **"Rejoindre la salle"** apparaît et ouvre `https://meet.jit.si/onlymatt-live` dans un nouvel onglet (pas d'iframe, pas de limite de temps).
 - Intégration complète du backend :
   - `POST /api/payhip/validate` pour vérifier le code.
   - `GET /api/movies` pour afficher le catalogue (Turso).
@@ -35,6 +35,7 @@ Créer `.env.local` :
 VITE_API_BASE_URL=https://super-videotheque-api.onrender.com
 VITE_ADMIN_PASSWORD=<password>
 VITE_LIVE_HLS_URL=https://meet.onlymatt.ca/hls/<stream_key>.m3u8
+VITE_LIVE_FALLBACK_URL=https://iframe.mediadelivery.net/embed/552081/<video_id>?autoplay=true&loop=true&muted=true
 ```
 
 **Démarrage**
@@ -62,13 +63,14 @@ src/
 | `VITE_API_BASE_URL` | URL du backend **sans `/api`** (ex: `https://super-videotheque-api.onrender.com`). |
 | `VITE_ADMIN_PASSWORD` | Mot de passe admin pour l'interface de gestion. |
 | `VITE_LIVE_HLS_URL` | URL du manifest HLS (ex: `https://meet.onlymatt.ca/hls/<stream_key>.m3u8`). |
+| `VITE_LIVE_FALLBACK_URL` | URL de la vidéo Bunny affichée quand pas de live actif. |
 
 ## Expérience utilisateur
 1. L'utilisateur saisit email + code Payhip → validation côté backend.
 2. Une fois validé, redirection vers `/catalog` avec chargement des films.
 3. Chaque carte lance un aperçu vidéo 4 secondes après être visible.
 4. Bouton "Regarder" → création/rafraîchissement d'une location → récupération du lien signé Bunny.net → lecture mobile-friendly.
-5. Section Live : affiche automatiquement le stream en cours (~6s de latence) quand OBS streame via RTMP.
+5. Section Live : affiche automatiquement le stream en cours (~6s de latence) quand OBS streame via RTMP. Si pas de live, affiche la vidéo fallback Bunny (`VITE_LIVE_FALLBACK_URL`). Quand live actif, bouton "Rejoindre la salle" ouvre Jitsi dans un nouvel onglet.
 
 ## Architecture Live Streaming
 
