@@ -1,37 +1,28 @@
 # SUPER-VIDEOTHEQUE · Frontend
 
-Interface React + TypeScript + Vite, mobile-first et inspirée de Netflix pour parcourir le catalogue SUPER-VIDEOTHEQUE, valider un code Payhip et lancer la lecture sécurisée Bunny.net.
+Interface React + TypeScript + Vite, mobile-first et inspirée de Netflix pour parcourir le catalogue SUPER-VIDEOTHEQUE, valider un code Payhip, lancer la lecture sécurisée Bunny.net et visionner les streams live OBS→RTMP→HLS.
 
 ## Fonctionnalités
 - Landing page sombre avec formulaire de validation Payhip + email.
 - Catalogue horizontal avec affiches, cartes glassmorphism et hover states.
 - Auto-play d'un aperçu vidéo 4 secondes après l'apparition d'une carte (IntersectionObserver + hook custom).
+- **Section Live** (`LiveSection.tsx`) : poll `GET /api/live` toutes les 3s, affiche le player HLS (hls.js) automatiquement quand un stream OBS est actif (~6s de latence).
 - Intégration complète du backend :
-	- `POST /api/payhip/validate` pour vérifier le code.
-	- `GET /api/movies` pour afficher le catalogue MongoDB.
-	- `POST /api/rentals` & `GET /api/rentals/:id` pour générer / rafraîchir un lien signé Bunny.net.
+  - `POST /api/payhip/validate` pour vérifier le code.
+  - `GET /api/movies` pour afficher le catalogue (Turso).
+  - `POST /api/rentals` & `GET /api/rentals/:id` pour générer / rafraîchir un lien signé Bunny.net.
+  - `GET /api/live` pour détecter si un stream est actif.
 - Lecteur vidéo responsive (Radix Dialog + HTML5 video `playsInline`).
 - Zustand pour la session Payhip + location active + état des previews.
 - TailwindCSS + thème night/ember pour un design moderne type Netflix.
 
 ## Déploiement Vercel
 
-Ce frontend est déployé en tant que site statique sur Vercel.
+Auto-déployé à chaque push sur `main` via GitHub → Vercel.
 
-**URL de production:** https://frontend-p7cuqder5-matts-projects-77a3636c.vercel.app
-
-**Configuration requise:**
-
-**Déploiement:**
 ```bash
-cd frontend
-vercel --prod
+git push origin main  # déclenche le redéploiement automatiquement
 ```
-Deployment note (Feb 2026): Public previews are now served from the API’s DB only; no Bunny public keys in runtime. A fresh deploy ensures clients load the updated endpoint and signed URLs.
-
-Le build Vite est automatique via `vercel build`.
-
-Note (Feb 2026): embed mobile optimisé (`?embed=1` + `100svh`). Si le projet Vercel est connecté au repo GitHub, chaque push déclenche un redeploy automatique.
 
 ## Développement local
 
@@ -39,7 +30,12 @@ Note (Feb 2026): embed mobile optimisé (`?embed=1` + `100svh`). Si le projet Ve
 - Node.js LTS (recommandé: `22`, voir `.nvmrc`)
 
 **Variables d'environnement**
-- `VITE_API_BASE_URL` (ex: `https://super-videotheque-api.onrender.com/api`)
+Créer `.env.local` :
+```
+VITE_API_BASE_URL=https://super-videotheque-api.onrender.com
+VITE_ADMIN_PASSWORD=<password>
+VITE_LIVE_HLS_URL=https://meet.onlymatt.ca/hls/<stream_key>.m3u8
+```
 
 **Démarrage**
 ```bash
@@ -51,28 +47,47 @@ npm run dev
 ## Structure
 ```
 src/
-	api/                # appels REST (axios)
-	components/         # UI réutilisable (carrousel, modale, lecteur)
-	features/           # stores Zustand (catalog + session)
-	hooks/              # hooks custom (prévisualisation différée)
-	pages/              # Landing + Catalog
-	types/              # contrats partagés (Movie, Rental...)
+  api/                # appels REST (axios)
+  components/         # UI réutilisable (carrousel, modale, lecteur, LiveSection)
+  features/           # stores Zustand (catalog + session)
+  hooks/              # hooks custom (prévisualisation différée)
+  pages/              # Landing + Catalog
+  types/              # contrats partagés (Movie, Rental...)
 ```
 
 ## Variables d'environnement (Vercel)
 
 | Nom | Description |
 | --- | --- |
-| `VITE_API_BASE_URL` | URL du backend (ex: `https://<ton-service>.onrender.com/api`). |
+| `VITE_API_BASE_URL` | URL du backend **sans `/api`** (ex: `https://super-videotheque-api.onrender.com`). |
+| `VITE_ADMIN_PASSWORD` | Mot de passe admin pour l'interface de gestion. |
+| `VITE_LIVE_HLS_URL` | URL du manifest HLS (ex: `https://meet.onlymatt.ca/hls/<stream_key>.m3u8`). |
 
 ## Expérience utilisateur
 1. L'utilisateur saisit email + code Payhip → validation côté backend.
 2. Une fois validé, redirection vers `/catalog` avec chargement des films.
 3. Chaque carte lance un aperçu vidéo 4 secondes après être visible.
 4. Bouton "Regarder" → création/rafraîchissement d'une location → récupération du lien signé Bunny.net → lecture mobile-friendly.
+5. Section Live : affiche automatiquement le stream en cours (~6s de latence) quand OBS streame via RTMP.
+
+## Architecture Live Streaming
+
+```
+OBS → RTMP (rtmp://meet.onlymatt.ca/live/<stream_key>)
+    → nginx-rtmp (VPS Hostinger, Ubuntu)
+    → HLS segments (/var/www/hls/)
+    → HTTPS (meet.onlymatt.ca/hls/<stream_key>.m3u8)
+    → API Render HEAD check → {"live": true/false}
+    → Frontend LiveSection (hls.js player, ~6s latence)
+```
+
+**Config OBS requise :**
+- Keyframe interval : `2` secondes
+- Bitrate : 2500-4000 kbps
+- Profil : main
 
 ## Idées d'évolution
 1. Authentification complète (JWT) + profils.
 2. Multiples carrousels (genres, recommandations personnalisées).
 3. Persist de la session/rentals + gestion offline.
-
+4. Chat live intégré durant les streams.
