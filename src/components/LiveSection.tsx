@@ -5,7 +5,7 @@ import JitsiRoom from './JitsiRoom';
 
 const HLS_URL = import.meta.env.VITE_LIVE_HLS_URL ?? 'https://meet.onlymatt.ca/hls/test.m3u8';
 const LIVE_STATUS_ENDPOINT = '/api/live';
-const CHECK_INTERVAL = 3000; // vérifier toutes les 3 secondes
+const CHECK_INTERVAL = 3000;
 
 interface LiveSectionProps {
   fallbackSrc?: string;
@@ -14,12 +14,14 @@ interface LiveSectionProps {
 const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
   const [isLive, setIsLive] = useState(false);
   const [showJitsi, setShowJitsi] = useState(false);
+  const [showNamePrompt, setShowNamePrompt] = useState(false);
+  const [alias, setAlias] = useState('');
+  const [pendingAlias, setPendingAlias] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
   // Détecter si le stream est actif avec stabilité (debounce)
   useEffect(() => {
-    // Comptage de succès/échecs pour stabiliser l'état live
     const successRef = { count: 0 } as { count: number };
     const failRef = { count: 0 } as { count: number };
     const liveRef = { value: isLive } as { value: boolean };
@@ -29,15 +31,13 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
       setIsLive(v);
     };
 
-    const MIN_SUCCESS = 2; // nombre de réponses API { live: true } pour considérer live
-    const MIN_FAIL = 3; // nombre d'échecs/false consécutifs pour considérer offline
+    const MIN_SUCCESS = 2;
+    const MIN_FAIL = 3;
 
     const checkLive = async () => {
       try {
         const res = await apiClient.get<{ live: boolean }>(LIVE_STATUS_ENDPOINT, {
-          headers: {
-            'Cache-Control': 'no-cache'
-          }
+          headers: { 'Cache-Control': 'no-cache' }
         });
         if (res.data?.live) {
           successRef.count += 1;
@@ -51,15 +51,10 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
         successRef.count = 0;
       }
 
-      if (!liveRef.value && successRef.count >= MIN_SUCCESS) {
-        setLiveState(true);
-      }
-      if (liveRef.value && failRef.count >= MIN_FAIL) {
-        setLiveState(false);
-      }
+      if (!liveRef.value && successRef.count >= MIN_SUCCESS) setLiveState(true);
+      if (liveRef.value && failRef.count >= MIN_FAIL) setLiveState(false);
     };
 
-    // Lancer immédiatement puis en intervalle
     checkLive();
     const interval = setInterval(checkLive, CHECK_INTERVAL);
     return () => clearInterval(interval);
@@ -76,7 +71,7 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
       return;
     }
     if (Hls.isSupported()) {
-      const hls = new Hls({ 
+      const hls = new Hls({
         lowLatencyMode: true,
         backBufferLength: 0,
         maxLiveSyncPlaybackRate: 1.5,
@@ -90,7 +85,6 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
       hls.on(Hls.Events.MANIFEST_PARSED, () => {
         video.play().catch(() => {});
       });
-      // Rester au live edge lors d'une erreur de buffer
       hls.on(Hls.Events.ERROR, (_event, data) => {
         if (data.fatal) {
           hls.stopLoad();
@@ -113,6 +107,23 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
     };
   }, [isLive]);
 
+  const handleJoinClick = () => {
+    if (alias) {
+      // Déjà un alias — rejoindre directement
+      setShowJitsi(true);
+    } else {
+      setShowNamePrompt(true);
+    }
+  };
+
+  const handleConfirmAlias = () => {
+    const name = pendingAlias.trim();
+    if (!name) return;
+    setAlias(`ONLY ${name}`);
+    setShowNamePrompt(false);
+    setShowJitsi(true);
+  };
+
   return (
     <section className="relative overflow-hidden rounded-3xl bg-black/50 backdrop-blur-sm border border-white/10">
 
@@ -131,13 +142,56 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
             <span className="text-slate-400 text-sm">Pas de live en cours</span>
           )}
         </div>
-        <button
-          onClick={() => setShowJitsi(true)}
-          className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all"
-        >
-          🎥 Rejoindre la salle
-        </button>
+        <div className="flex items-center gap-2">
+          {showJitsi ? (
+            <button
+              onClick={() => setShowJitsi(false)}
+              className="px-4 py-2 rounded-full bg-red-500/20 hover:bg-red-500/40 text-red-400 text-sm font-medium transition-all"
+            >
+              ✕ Quitter la salle
+            </button>
+          ) : (
+            <button
+              onClick={handleJoinClick}
+              className="px-4 py-2 rounded-full bg-white/10 hover:bg-white/20 text-white text-sm font-medium transition-all"
+            >
+              🎥 Rejoindre la salle
+            </button>
+          )}
+        </div>
       </div>
+
+      {/* Prompt nom */}
+      {showNamePrompt && (
+        <div className="p-4 border-b border-white/10 bg-white/5">
+          <p className="text-white/80 text-sm mb-3">Ton prénom pour la salle :</p>
+          <div className="flex gap-2 items-center">
+            <span className="text-white/50 text-sm shrink-0">ONLY</span>
+            <input
+              autoFocus
+              type="text"
+              value={pendingAlias}
+              onChange={(e) => setPendingAlias(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleConfirmAlias()}
+              placeholder="Mathieu"
+              className="flex-1 bg-white/10 text-white rounded-lg px-3 py-2 text-sm outline-none border border-white/20 focus:border-white/50 placeholder:text-white/30"
+            />
+            <button
+              onClick={handleConfirmAlias}
+              disabled={!pendingAlias.trim()}
+              className="px-4 py-2 rounded-lg bg-ember text-night text-sm font-semibold disabled:opacity-40 transition-all"
+            >
+              Entrer
+            </button>
+            <button
+              onClick={() => setShowNamePrompt(false)}
+              className="px-3 py-2 rounded-lg bg-white/10 text-white/60 text-sm transition-all hover:bg-white/20"
+            >
+              Annuler
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Zone vidéo */}
       <div className="relative aspect-video w-full bg-black">
@@ -151,7 +205,7 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
           />
         </div>
 
-        {/* Fallback ou message — visible seulement si pas live */}
+        {/* Fallback ou message */}
         {!isLive && (
           fallbackSrc ? (
             fallbackSrc.includes('iframe.mediadelivery.net') || fallbackSrc.includes('youtube') || fallbackSrc.includes('youtu.be') ? (
@@ -182,22 +236,19 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
         )}
       </div>
 
-      {/* Modal Jitsi */}
+      {/* Salle Jitsi — sous le stream */}
       {showJitsi && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
-          <div className="relative w-full max-w-4xl" style={{ height: '80vh' }}>
-            <button
-              onClick={() => setShowJitsi(false)}
-              className="absolute -top-4 -right-4 z-10 w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white"
-            >
-              ✕
-            </button>
-            <div className="h-full w-full rounded-2xl overflow-hidden">
-              <JitsiRoom roomName="NO ZOOM ROOM" userName="ONLYMATT" />
-            </div>
+        <div className="border-t border-white/10">
+          <div className="p-3 bg-white/5 flex items-center justify-between">
+            <span className="text-white/60 text-xs">Salle interactive — {alias}</span>
+            <span className="text-white/40 text-xs">Caméra/micro contrôlés dans la salle</span>
+          </div>
+          <div style={{ height: '480px' }}>
+            <JitsiRoom roomName="onlymatt-live" userName={alias} />
           </div>
         </div>
       )}
+
     </section>
   );
 };
