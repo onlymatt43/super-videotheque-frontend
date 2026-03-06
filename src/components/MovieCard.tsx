@@ -11,7 +11,7 @@ interface Props {
   onWatch: () => void;
 }
 
-const FALLBACK_POSTER = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=600&q=60';
+const FALLBACK_POSTER = '/thumbnail-placeholder.png';
 const FALLBACK_PREVIEW = 'https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4';
 
 type AspectRatio = 'vertical' | 'horizontal' | 'square';

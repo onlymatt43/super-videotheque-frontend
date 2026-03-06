@@ -3,7 +3,7 @@ import { fetchPublicPreviews, type PublicPreview } from '../api/movies';
 import { PreviewPlayer } from './PreviewPlayer';
 import clsx from 'clsx';
 
-const FALLBACK_POSTER = 'https://images.unsplash.com/photo-1485846234645-a62644f84728?auto=format&fit=crop&w=600&q=60';
+const FALLBACK_POSTER = '/thumbnail-placeholder.png';
 
 interface PreviewCardProps {
   preview: PublicPreview;

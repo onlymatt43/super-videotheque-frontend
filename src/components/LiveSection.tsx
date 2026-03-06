@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
+import { apiClient } from '../api/client';
 import JitsiRoom from './JitsiRoom';
 
-const HLS_URL = 'https://meet.onlymatt.ca/hls/test.m3u8';
+const HLS_URL = import.meta.env.VITE_LIVE_HLS_URL ?? 'https://meet.onlymatt.ca/hls/test.m3u8';
+const LIVE_STATUS_ENDPOINT = '/live';
 const CHECK_INTERVAL = 3000; // vérifier toutes les 3 secondes
 
 interface LiveSectionProps {
@@ -28,13 +30,17 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
       setIsLive(v);
     };
 
-    const MIN_SUCCESS = 2; // nombre de HEAD OK consécutifs pour considérer live
-    const MIN_FAIL = 3; // nombre d'échecs consécutifs pour considérer offline
+    const MIN_SUCCESS = 2; // nombre de réponses API { live: true } pour considérer live
+    const MIN_FAIL = 3; // nombre d'échecs/false consécutifs pour considérer offline
 
     const checkLive = async () => {
       try {
-        const res = await fetch(HLS_URL, { method: 'HEAD', cache: 'no-store' });
-        if (res.ok) {
+        const res = await apiClient.get<{ live: boolean }>(LIVE_STATUS_ENDPOINT, {
+          headers: {
+            'Cache-Control': 'no-cache'
+          }
+        });
+        if (res.data?.live) {
           successRef.count += 1;
           failRef.count = 0;
         } else {
