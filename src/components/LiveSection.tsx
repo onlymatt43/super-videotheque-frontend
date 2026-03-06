@@ -124,53 +124,57 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
 
       {/* Zone vidéo */}
       <div className="relative aspect-video w-full bg-black">
-      {isLive ? (
-          <div className="relative h-full w-full group">
-            <video
-              ref={videoRef}
-              playsInline
-              className="h-full w-full"
-            />
-            {/* Contrôles custom — juste play/pause, pas de seekbar */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <button
-                onClick={togglePlay}
-                className="w-16 h-16 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white text-2xl transition-all"
-              >
-                {isPaused ? '▶' : '⏸'}
-              </button>
-            </div>
-            {isPaused && (
-              <div className="absolute bottom-4 left-4 bg-black/70 text-yellow-400 text-xs px-3 py-1 rounded-full">
-                En pause — le live continue sans vous
-              </div>
-            )}
+
+        {/* Vidéo HLS — toujours dans le DOM, cachée si pas live */}
+        <div className={`absolute inset-0 group ${isLive ? 'block' : 'hidden'}`}>
+          <video
+            ref={videoRef}
+            playsInline
+            className="h-full w-full"
+          />
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+            <button
+              onClick={togglePlay}
+              className="w-16 h-16 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white text-2xl transition-all"
+            >
+              {isPaused ? '▶' : '⏸'}
+            </button>
           </div>
-        ) : fallbackSrc ? (
-          fallbackSrc.includes('iframe.mediadelivery.net') || fallbackSrc.includes('youtube') || fallbackSrc.includes('youtu.be') ? (
-            <iframe
-              src={fallbackSrc}
-              className="absolute inset-0 h-full w-full border-0"
-              allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
-              allowFullScreen
-            />
+          {isPaused && (
+            <div className="absolute bottom-4 left-4 bg-black/70 text-yellow-400 text-xs px-3 py-1 rounded-full">
+              En pause — le live continue sans vous
+            </div>
+          )}
+        </div>
+
+        {/* Fallback ou message — visible seulement si pas live */}
+        {!isLive && (
+          fallbackSrc ? (
+            fallbackSrc.includes('iframe.mediadelivery.net') || fallbackSrc.includes('youtube') || fallbackSrc.includes('youtu.be') ? (
+              <iframe
+                src={fallbackSrc}
+                className="absolute inset-0 h-full w-full border-0"
+                allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+              />
+            ) : (
+              <video
+                src={fallbackSrc}
+                controls
+                playsInline
+                loop
+                className="h-full w-full"
+              />
+            )
           ) : (
-            <video
-              src={fallbackSrc}
-              controls
-              playsInline
-              loop
-              className="h-full w-full"
-            />
-          )
-        ) : (
-          <div className="flex h-full items-center justify-center">
-            <div className="text-center text-slate-400">
-              <p className="text-5xl mb-4">📡</p>
-              <p className="text-base font-medium text-white/60">Pas de live en ce moment</p>
-              <p className="text-sm mt-1">Le prochain live sera annoncé prochainement</p>
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center text-slate-400">
+                <p className="text-5xl mb-4">📡</p>
+                <p className="text-base font-medium text-white/60">Pas de live en ce moment</p>
+                <p className="text-sm mt-1">Le prochain live sera annoncé prochainement</p>
+              </div>
             </div>
-          </div>
+          )
         )}
       </div>
 
