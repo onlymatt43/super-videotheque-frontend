@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import Hls from 'hls.js';
 import { apiClient } from '../api/client';
 import { useSession } from '../features/session/useSession';
+import JitsiRoom from './JitsiRoom';
 
 const HLS_URL = import.meta.env.VITE_LIVE_HLS_URL ?? 'https://meet.onlymatt.ca/hls/test.m3u8';
 const LIVE_STATUS_ENDPOINT = '/api/live';
@@ -103,8 +104,11 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
     };
   }, [isLive]);
 
+  const [showJitsi, setShowJitsi] = useState(false);
+  const [selectedRentalId, setSelectedRentalId] = useState<string | undefined>(undefined);
+
   const handleJoinClick = () => {
-    // Try to get an active rentalId from session and request a Jitsi token
+    // Find active rentalId in session; if present, show embedded JitsiRoom
     const rentals = useSession.getState().rentals;
     const now = Date.now();
     const active = Object.values(rentals).find(r => {
@@ -116,35 +120,13 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
     });
     const rentalId = active?.rentalId;
 
-    (async () => {
-      try {
-        if (!rentalId) {
-          // No active rental: open info page or fallback to public room
-          return window.open('https://jitsi.onlymatt.ca/onlymatt-live', '_blank');
-        }
-        const res = await fetch('/api/jitsi/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ rentalId, room: 'onlymatt-live' })
-        });
-        if (!res.ok) {
-          const txt = await res.text();
-          console.error('token fetch failed', txt);
-          return window.open('https://jitsi.onlymatt.ca/onlymatt-live', '_blank');
-        }
-        const json = await res.json();
-        const token = json.data?.token;
-        if (token) {
-          const url = `https://jitsi.onlymatt.ca/onlymatt-live?jwt=${encodeURIComponent(token)}`;
-          window.open(url, '_blank');
-        } else {
-          window.open('https://jitsi.onlymatt.ca/onlymatt-live', '_blank');
-        }
-      } catch (err) {
-        console.error('Failed to get jitsi token', err);
-        window.open('https://jitsi.onlymatt.ca/onlymatt-live', '_blank');
-      }
-    })();
+    if (!rentalId) {
+      // No active rental: open public room in new tab
+      return window.open('https://jitsi.onlymatt.ca/onlymatt-live', '_blank');
+    }
+
+    setSelectedRentalId(rentalId);
+    setShowJitsi(true);
   };
 
   return (
@@ -179,6 +161,12 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
 
       {/* Zone vidéo */}
       <div className="relative aspect-video w-full bg-black">
+        {/* Embedded JitsiRoom when requested */}
+        {showJitsi && selectedRentalId ? (
+          <div className="absolute inset-0">
+            <JitsiRoom roomName="onlymatt-live" userName={useSession.getState().customerEmail ?? 'Invité'} rentalId={selectedRentalId} />
+          </div>
+        ) : null}
 
         {/* Vidéo HLS — toujours dans le DOM, cachée si pas live */}
         <div className={`absolute inset-0 ${isLive ? 'block' : 'hidden'}`}>

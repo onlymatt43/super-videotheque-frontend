@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const JITSI_HOST = 'jitsi.onlymatt.ca';
 
@@ -42,7 +42,7 @@ const JitsiRoom = ({ roomName, userName, rentalId }: { roomName: string; userNam
     : `https://${JITSI_HOST}/${encodeURIComponent(roomName)}`;
 
   return (
-    <div style={{ height: '800px', width: '100%' }}>
+    <div style={{ height: '800px', width: '100%' }} data-user={userName}>
       {loading && <div>Chargement de la session...</div>}
       {error && <div style={{ color: 'red' }}>Erreur: {error}</div>}
       <iframe
