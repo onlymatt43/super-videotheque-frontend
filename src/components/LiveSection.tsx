@@ -14,7 +14,6 @@ interface LiveSectionProps {
 const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
   const [isLive, setIsLive] = useState(false);
   const [showJitsi, setShowJitsi] = useState(false);
-  const [isPaused, setIsPaused] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
@@ -114,23 +113,6 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
     };
   }, [isLive]);
 
-  const togglePlay = () => {
-    const video = videoRef.current;
-    if (!video) return;
-    if (video.paused) {
-      // Sauter au live edge avant de reprendre
-      if (hlsRef.current) {
-        const levels = hlsRef.current.liveSyncPosition;
-        if (levels) video.currentTime = levels;
-      }
-      video.play().catch(() => {});
-      setIsPaused(false);
-    } else {
-      video.pause();
-      setIsPaused(true);
-    }
-  };
-
   return (
     <section className="relative overflow-hidden rounded-3xl bg-black/50 backdrop-blur-sm border border-white/10">
 
@@ -161,25 +143,12 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
       <div className="relative aspect-video w-full bg-black">
 
         {/* Vidéo HLS — toujours dans le DOM, cachée si pas live */}
-        <div className={`absolute inset-0 group ${isLive ? 'block' : 'hidden'}`}>
+        <div className={`absolute inset-0 ${isLive ? 'block' : 'hidden'}`}>
           <video
             ref={videoRef}
             playsInline
             className="h-full w-full"
           />
-          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={togglePlay}
-              className="w-16 h-16 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center text-white text-2xl transition-all"
-            >
-              {isPaused ? '▶' : '⏸'}
-            </button>
-          </div>
-          {isPaused && (
-            <div className="absolute bottom-4 left-4 bg-black/70 text-yellow-400 text-xs px-3 py-1 rounded-full">
-              En pause — le live continue sans vous
-            </div>
-          )}
         </div>
 
         {/* Fallback ou message — visible seulement si pas live */}
