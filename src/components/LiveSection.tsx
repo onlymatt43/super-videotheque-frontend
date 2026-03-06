@@ -4,7 +4,7 @@ import { apiClient } from '../api/client';
 import JitsiRoom from './JitsiRoom';
 
 const HLS_URL = import.meta.env.VITE_LIVE_HLS_URL ?? 'https://meet.onlymatt.ca/hls/test.m3u8';
-const LIVE_STATUS_ENDPOINT = '/live';
+const LIVE_STATUS_ENDPOINT = '/api/live';
 const CHECK_INTERVAL = 3000; // vérifier toutes les 3 secondes
 
 interface LiveSectionProps {
