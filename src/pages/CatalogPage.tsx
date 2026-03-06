@@ -176,7 +176,7 @@ export const CatalogPage = () => {
         </div>
       )}
 
-      <LiveSection />
+      <LiveSection fallbackSrc="https://iframe.mediadelivery.net/embed/552081/e2492431-c1e2-4d6c-be83-0845ea4410d8?autoplay=true&loop=true&muted=true" />
 
       {loading && <p className="text-center text-slate">Chargement du catalogue...</p>}
       {error && <p className="text-center text-red-400">{error}</p>}
