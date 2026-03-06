@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { apiClient } from '../api/client';
 
 const JITSI_HOST = 'jitsi.onlymatt.ca';
 
@@ -14,17 +15,11 @@ const JitsiRoom = ({ roomName, userName, rentalId }: { roomName: string; userNam
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch('/api/jitsi/token', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ rentalId, room: roomName }),
+        const { data } = await apiClient.post<{ data: { token: string } }>('/api/jitsi/token', {
+          rentalId,
+          room: roomName,
         });
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error(text || `HTTP ${res.status}`);
-        }
-        const json = await res.json();
-        if (!aborted) setToken(json.data?.token ?? null);
+        if (!aborted) setToken(data.data?.token ?? null);
       } catch (err: any) {
         if (!aborted) setError(err?.message ?? 'Failed to get token');
       } finally {
