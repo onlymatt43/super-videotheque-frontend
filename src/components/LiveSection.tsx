@@ -16,16 +16,45 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
 
-  // Détecter si le stream est actif
+  // Détecter si le stream est actif avec stabilité (debounce)
   useEffect(() => {
+    // Comptage de succès/échecs pour stabiliser l'état live
+    const successRef = { count: 0 } as { count: number };
+    const failRef = { count: 0 } as { count: number };
+    const liveRef = { value: isLive } as { value: boolean };
+
+    const setLiveState = (v: boolean) => {
+      liveRef.value = v;
+      setIsLive(v);
+    };
+
+    const MIN_SUCCESS = 2; // nombre de HEAD OK consécutifs pour considérer live
+    const MIN_FAIL = 3; // nombre d'échecs consécutifs pour considérer offline
+
     const checkLive = async () => {
       try {
         const res = await fetch(HLS_URL, { method: 'HEAD', cache: 'no-store' });
-        setIsLive(res.ok);
+        if (res.ok) {
+          successRef.count += 1;
+          failRef.count = 0;
+        } else {
+          failRef.count += 1;
+          successRef.count = 0;
+        }
       } catch {
-        setIsLive(false);
+        failRef.count += 1;
+        successRef.count = 0;
+      }
+
+      if (!liveRef.value && successRef.count >= MIN_SUCCESS) {
+        setLiveState(true);
+      }
+      if (liveRef.value && failRef.count >= MIN_FAIL) {
+        setLiveState(false);
       }
     };
+
+    // Lancer immédiatement puis en intervalle
     checkLive();
     const interval = setInterval(checkLive, CHECK_INTERVAL);
     return () => clearInterval(interval);
