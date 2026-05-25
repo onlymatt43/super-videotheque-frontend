@@ -9,17 +9,14 @@ import { useSession } from '../features/session/useSession';
 export const LandingPage = () => {
   const navigate = useNavigate();
   const { getActiveAccess } = useSession();
-    const [isChatOpen, setIsChatOpen] = useState(false);
-    const [chatInitialView, setChatInitialView] = useState<'chat' | 'survey'>('chat');
-    const [showSurveyBubble, setShowSurveyBubble] = useState(false);
-
-    useEffect(() => {
-      const muted = localStorage.getItem('survey:mute') === 'true';
-      const last = localStorage.getItem('survey:lastPrompt');
-      const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-      const due = !muted && (!last || (Date.now() - Number(last)) > threeDaysMs);
-      setShowSurveyBubble(due);
-    }, []);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [chatInitialView, setChatInitialView] = useState<'chat' | 'survey'>('chat');
+  const [showSurveyBubble, setShowSurveyBubble] = useState(() => {
+    const muted = localStorage.getItem('survey:mute') === 'true';
+    const last = localStorage.getItem('survey:lastPrompt');
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    return !muted && (!last || (Date.now() - Number(last)) > threeDaysMs);
+  });
 
   const hasAccess = getActiveAccess().length > 0;
 

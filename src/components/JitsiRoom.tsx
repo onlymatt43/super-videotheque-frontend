@@ -20,8 +20,10 @@ const JitsiRoom = ({ roomName, userName, rentalId }: { roomName: string; userNam
           room: roomName,
         });
         if (!aborted) setToken(data.data?.token ?? null);
-      } catch (err: any) {
-        if (!aborted) setError(err?.message ?? 'Failed to get token');
+      } catch (err: unknown) {
+        if (!aborted) {
+          setError(err instanceof Error ? err.message : 'Failed to get token');
+        }
       } finally {
         if (!aborted) setLoading(false);
       }

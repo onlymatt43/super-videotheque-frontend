@@ -14,10 +14,11 @@ export const VideoPlayer = ({ src, title, onStart, onEnd }: VideoPlayerProps) =>
 
   useEffect(() => {
     if (!isBunnyEmbed) return;
+    type PlayerEventPayload = { event?: string; type?: string };
     const handler = (event: MessageEvent) => {
       const origin = typeof event.origin === 'string' ? event.origin : '';
       if (!origin.includes('mediadelivery.net')) return;
-      const data: any = event.data;
+      const data = (event.data as PlayerEventPayload | null) || null;
       const ev = data?.event || data?.type;
       if (!ev) return;
       if ((ev === 'play' || ev === 'playing') && !startedRef.current) {

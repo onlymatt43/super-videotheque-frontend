@@ -17,6 +17,7 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
   const [fallbackFailed, setFallbackFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+  const liveRef = useRef(false);
 
   useEffect(() => {
     setFallbackFailed(false);
@@ -26,10 +27,9 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
   useEffect(() => {
     const successRef = { count: 0 } as { count: number };
     const failRef = { count: 0 } as { count: number };
-    const liveRef = { value: isLive } as { value: boolean };
 
     const setLiveState = (v: boolean) => {
-      liveRef.value = v;
+      liveRef.current = v;
       setIsLive(v);
     };
 
@@ -53,8 +53,8 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
         successRef.count = 0;
       }
 
-      if (!liveRef.value && successRef.count >= MIN_SUCCESS) setLiveState(true);
-      if (liveRef.value && failRef.count >= MIN_FAIL) setLiveState(false);
+      if (!liveRef.current && successRef.count >= MIN_SUCCESS) setLiveState(true);
+      if (liveRef.current && failRef.count >= MIN_FAIL) setLiveState(false);
     };
 
     checkLive();

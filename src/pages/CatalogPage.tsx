@@ -239,7 +239,8 @@ export const CatalogPage = () => {
         throw new Error('Lien sécurisé momentanément indisponible.');
       }
 
-      const rentalId = (envelope.rental as any).id ?? (envelope.rental as any)._id;
+      const rentalData = envelope.rental as { id?: string; _id?: string };
+      const rentalId = rentalData.id ?? rentalData._id;
       if (!rentalId) {
         throw new Error('Rental not found');
       }

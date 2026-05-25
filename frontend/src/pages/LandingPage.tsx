@@ -11,7 +11,12 @@ export const LandingPage = () => {
   const { getActiveAccess } = useSession();
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInitialView, setChatInitialView] = useState<'chat' | 'survey'>('chat');
-  const [showSurveyBubble, setShowSurveyBubble] = useState(false);
+  const [showSurveyBubble, setShowSurveyBubble] = useState(() => {
+    const muted = localStorage.getItem('survey:mute') === 'true';
+    const last = localStorage.getItem('survey:lastPrompt');
+    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
+    return !muted && (!last || (Date.now() - Number(last)) > threeDaysMs);
+  });
 
   const hasAccess = getActiveAccess().length > 0;
 
@@ -20,14 +25,6 @@ export const LandingPage = () => {
       navigate('/catalog');
     }
   }, [hasAccess, navigate]);
-
-  useEffect(() => {
-    const muted = localStorage.getItem('survey:mute') === 'true';
-    const last = localStorage.getItem('survey:lastPrompt');
-    const threeDaysMs = 3 * 24 * 60 * 60 * 1000;
-    const due = !muted && (!last || (Date.now() - Number(last)) > threeDaysMs);
-    setShowSurveyBubble(due);
-  }, []);
 
   return (
     <div className="relative min-h-screen">

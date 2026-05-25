@@ -261,7 +261,9 @@ export const AIChat = ({ isOpen, onClose, initialView, prefillMessage }: AIChatP
               onSubmit={async (e) => {
                 e.preventDefault();
                 const form = e.currentTarget as HTMLFormElement;
-                const getVals = (name: string) => Array.from(form.querySelectorAll(`input[name='${name}']:checked`)).map((el: any) => el.value);
+                const getVals = (name: string) =>
+                  Array.from(form.querySelectorAll(`input[name='${name}']:checked`))
+                    .map((el) => (el as HTMLInputElement).value);
                 const frequency = (form.querySelector("select[name='frequency']") as HTMLSelectElement)?.value || undefined;
                 const answers = { genres: getVals('genres'), likeMore: getVals('more'), likeLess: getVals('less'), frequency };
                 try {
