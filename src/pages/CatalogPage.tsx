@@ -11,7 +11,7 @@ import { AccessManager } from '../components/AccessManager';
 import { PayhipForm } from '../components/PayhipForm';
 import LiveSection from '../components/LiveSection';
 
-const DEFAULT_FALLBACK_URL = 'https://iframe.mediadelivery.net/embed/552081/e2492431-c1e2-4d6c-be83-0845ea4410d8?autoplay=true&loop=true&muted=true';
+const DEFAULT_FALLBACK_URL = 'https://www.youtube.com/embed/jfKfPfyJRdk?autoplay=1&mute=1';
 const FALLBACK_SELECTION_KEY = 'live_fallback_last_url';
 const PRIVATE_FALLBACK_API_URL = (import.meta.env.VITE_LIVE_FALLBACK_PRIVATE_API_URL as string | undefined)?.trim();
 const PRIVATE_FALLBACK_REFRESH_MINUTES = Number(import.meta.env.VITE_LIVE_FALLBACK_PRIVATE_REFRESH_MINUTES ?? 25);
@@ -106,9 +106,7 @@ export const CatalogPage = () => {
 
     const loadPrivateFallback = async () => {
       try {
-        const response = await fetch(PRIVATE_FALLBACK_API_URL, {
-          headers: { 'Cache-Control': 'no-cache' }
-        });
+        const response = await fetch(PRIVATE_FALLBACK_API_URL);
         if (!response.ok) return;
 
         const payload = await response.json();
