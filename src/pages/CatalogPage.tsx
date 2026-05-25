@@ -283,6 +283,10 @@ export const CatalogPage = () => {
       {/* Access Manager */}
       <AccessManager />
 
+      <div className="rounded-2xl border border-white/10 bg-night-light/40 px-4 py-3 text-sm text-slate">
+        Classement par tags. L'acces aux videos depend toujours des codes actifs (temps, film ou categorie).
+      </div>
+
       {/* Add Code Form */}
       {showAddCode && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">

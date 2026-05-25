@@ -183,6 +183,10 @@ export const CatalogPage = () => {
         />
       </section>
 
+      <div className="rounded-2xl border border-white/10 bg-night-light/40 px-4 py-3 text-sm text-slate">
+        Classement par tags. L'acces aux videos depend toujours des codes actifs (temps, film ou categorie).
+      </div>
+
       {loading && <p className="text-center text-slate">Chargement du catalogue...</p>}
       {error && <p className="text-center text-red-400">{error}</p>}
 
