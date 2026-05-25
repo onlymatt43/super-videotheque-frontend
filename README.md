@@ -33,9 +33,11 @@ git push origin main  # déclenche le redéploiement automatiquement
 Créer `.env.local` :
 ```
 VITE_API_BASE_URL=https://super-videotheque-api.onrender.com
-VITE_ADMIN_PASSWORD=<password>
 VITE_LIVE_HLS_URL=https://meet.onlymatt.ca/hls/<stream_key>.m3u8
 VITE_LIVE_FALLBACK_URL=https://iframe.mediadelivery.net/embed/552081/<video_id>?autoplay=true&loop=true&muted=true
+VITE_LIVE_FALLBACK_URLS=https://iframe.mediadelivery.net/embed/...?... , https://youtube.com/embed/... , https://iframe.mediadelivery.net/embed/...?...
+VITE_LIVE_FALLBACK_PRIVATE_API_URL=https://chaud-devant.onlymatt.ca/api/get-videos
+VITE_LIVE_FALLBACK_PRIVATE_REFRESH_MINUTES=25
 ```
 
 **Démarrage**
@@ -61,9 +63,18 @@ src/
 | Nom | Description |
 | --- | --- |
 | `VITE_API_BASE_URL` | URL du backend **sans `/api`** (ex: `https://super-videotheque-api.onrender.com`). |
-| `VITE_ADMIN_PASSWORD` | Mot de passe admin pour l'interface de gestion. |
 | `VITE_LIVE_HLS_URL` | URL du manifest HLS (ex: `https://meet.onlymatt.ca/hls/<stream_key>.m3u8`). |
 | `VITE_LIVE_FALLBACK_URL` | URL de la vidéo Bunny affichée quand pas de live actif. |
+| `VITE_LIVE_FALLBACK_URLS` | Liste d'URLs fallback séparées par virgules (ou retours ligne), choisies aléatoirement côté frontend sans répétition immédiate. |
+| `VITE_LIVE_FALLBACK_PRIVATE_API_URL` | Endpoint JSON (ex: `get-videos`) pour tirer des URLs signées. Le frontend privilégie les vidéos `locked=true` puis en choisit une au hasard. |
+| `VITE_LIVE_FALLBACK_PRIVATE_REFRESH_MINUTES` | Intervalle (minutes) de rafraîchissement automatique des URLs privées signées. Par défaut: `25`. |
+
+### Auth admin (backend)
+- Le login admin frontend utilise un code TOTP 6 chiffres (app sur cell), validé côté API via `POST /api/admin/auth/login`.
+- Variables backend requises :
+  - `ADMIN_TOTP_SECRET` : secret TOTP (base32) utilisé par ton app mobile.
+  - `ADMIN_SESSION_SECRET` : secret de signature des tokens de session admin.
+  - `ADMIN_SESSION_TTL_MINUTES` : durée d'expiration du token admin (par défaut `480`).
 
 ## Expérience utilisateur
 1. L'utilisateur saisit email + code Payhip → validation côté backend.

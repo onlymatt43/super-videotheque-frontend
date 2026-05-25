@@ -11,6 +11,60 @@ import { AccessManager } from '../components/AccessManager';
 import { PayhipForm } from '../components/PayhipForm';
 import LiveSection from '../components/LiveSection';
 
+const DEFAULT_FALLBACK_URL = 'https://iframe.mediadelivery.net/embed/552081/e2492431-c1e2-4d6c-be83-0845ea4410d8?autoplay=true&loop=true&muted=true';
+const FALLBACK_SELECTION_KEY = 'live_fallback_last_url';
+const PRIVATE_FALLBACK_API_URL = (import.meta.env.VITE_LIVE_FALLBACK_PRIVATE_API_URL as string | undefined)?.trim();
+const PRIVATE_FALLBACK_REFRESH_MINUTES = Number(import.meta.env.VITE_LIVE_FALLBACK_PRIVATE_REFRESH_MINUTES ?? 25);
+const PRIVATE_FALLBACK_REFRESH_MS = Number.isFinite(PRIVATE_FALLBACK_REFRESH_MINUTES)
+  ? Math.max(1, PRIVATE_FALLBACK_REFRESH_MINUTES) * 60 * 1000
+  : 25 * 60 * 1000;
+
+type PrivateFallbackItem = {
+  locked?: boolean;
+  bunny_urls?: Record<string, string>;
+};
+
+const parseFallbackUrls = () => {
+  const rawList = import.meta.env.VITE_LIVE_FALLBACK_URLS as string | undefined;
+  const rawSingle = import.meta.env.VITE_LIVE_FALLBACK_URL as string | undefined;
+
+  const fromList = rawList
+    ? rawList.split(/[\n,;]/).map((value) => value.trim()).filter(Boolean)
+    : [];
+
+  const combined = fromList.length > 0 ? fromList : (rawSingle ? [rawSingle.trim()] : []);
+  return combined.length > 0 ? combined : [DEFAULT_FALLBACK_URL];
+};
+
+const pickRandomFallback = (urls: string[]) => {
+  if (urls.length <= 1) return urls[0];
+
+  const lastPicked = sessionStorage.getItem(FALLBACK_SELECTION_KEY);
+  const pool = urls.filter((url) => url !== lastPicked);
+  const nextPool = pool.length > 0 ? pool : urls;
+  const picked = nextPool[Math.floor(Math.random() * nextPool.length)];
+
+  sessionStorage.setItem(FALLBACK_SELECTION_KEY, picked);
+  return picked;
+};
+
+const pickUrlFromPrivateItem = (item: PrivateFallbackItem): string | null => {
+  const urls = item.bunny_urls || {};
+  const preferredOrder = ['9x16', '16x9', '1x1', 'preview', 'default'];
+
+  for (const key of preferredOrder) {
+    const value = String(urls[key] || '').trim();
+    if (value) return value;
+  }
+
+  for (const value of Object.values(urls)) {
+    const clean = String(value || '').trim();
+    if (clean) return clean;
+  }
+
+  return null;
+};
+
 interface VideoState {
   open: boolean;
   movie?: Movie;
@@ -36,6 +90,7 @@ export const CatalogPage = () => {
   const [prefillMessage, setPrefillMessage] = useState<string | undefined>(undefined);
   const [categories, setCategories] = useState<Category[]>([]);
   const [showAddCode, setShowAddCode] = useState(false);
+  const [liveFallbackSrc, setLiveFallbackSrc] = useState<string>(() => pickRandomFallback(parseFallbackUrls()));
 
   useEffect(() => {
     if (!movies.length) {
@@ -43,6 +98,48 @@ export const CatalogPage = () => {
     }
     fetchCategories().then(setCategories).catch(console.error);
   }, [movies.length, fetchCatalog]);
+
+  useEffect(() => {
+    if (!PRIVATE_FALLBACK_API_URL) return;
+
+    let isCancelled = false;
+
+    const loadPrivateFallback = async () => {
+      try {
+        const response = await fetch(PRIVATE_FALLBACK_API_URL, {
+          headers: { 'Cache-Control': 'no-cache' }
+        });
+        if (!response.ok) return;
+
+        const payload = await response.json();
+        const list: PrivateFallbackItem[] = Array.isArray(payload)
+          ? payload
+          : (Array.isArray(payload?.data) ? payload.data : []);
+
+        if (list.length === 0) return;
+
+        const privateOnly = list.filter((item) => item.locked === true);
+        const source = privateOnly.length > 0 ? privateOnly : list;
+
+        const urls = source
+          .map(pickUrlFromPrivateItem)
+          .filter((value): value is string => Boolean(value));
+
+        if (urls.length === 0 || isCancelled) return;
+        setLiveFallbackSrc(pickRandomFallback(urls));
+      } catch {
+        // Keep existing env fallback on any network/parsing issue.
+      }
+    };
+
+    loadPrivateFallback();
+    const intervalId = window.setInterval(loadPrivateFallback, PRIVATE_FALLBACK_REFRESH_MS);
+
+    return () => {
+      isCancelled = true;
+      window.clearInterval(intervalId);
+    };
+  }, []);
 
   // Featured movie: random from "soon" category or placeholder
   // const featured = useMemo(() => {
@@ -176,7 +273,7 @@ export const CatalogPage = () => {
         </div>
       )}
 
-      <LiveSection fallbackSrc={import.meta.env.VITE_LIVE_FALLBACK_URL ?? 'https://iframe.mediadelivery.net/embed/552081/e2492431-c1e2-4d6c-be83-0845ea4410d8?autoplay=true&loop=true&muted=true'} />
+      <LiveSection fallbackSrc={liveFallbackSrc} />
 
       {loading && <p className="text-center text-slate">Chargement du catalogue...</p>}
       {error && <p className="text-center text-red-400">{error}</p>}
