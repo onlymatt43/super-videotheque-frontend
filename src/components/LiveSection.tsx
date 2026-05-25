@@ -14,8 +14,13 @@ interface LiveSectionProps {
 
 const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
   const [isLive, setIsLive] = useState(false);
+  const [fallbackFailed, setFallbackFailed] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hlsRef = useRef<Hls | null>(null);
+
+  useEffect(() => {
+    setFallbackFailed(false);
+  }, [fallbackSrc, isLive]);
 
   // Détecter si le stream est actif avec stabilité (debounce)
   useEffect(() => {
@@ -179,13 +184,14 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
 
         {/* Fallback ou message */}
         {!isLive && (
-          fallbackSrc ? (
+          fallbackSrc && !fallbackFailed ? (
             fallbackSrc.includes('iframe.mediadelivery.net') || fallbackSrc.includes('youtube') || fallbackSrc.includes('youtu.be') ? (
               <iframe
                 src={fallbackSrc}
                 className="absolute inset-0 h-full w-full border-0"
                 allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture"
                 allowFullScreen
+                onError={() => setFallbackFailed(true)}
               />
             ) : (
               <video
@@ -194,8 +200,23 @@ const LiveSection = ({ fallbackSrc }: LiveSectionProps) => {
                 playsInline
                 loop
                 className="h-full w-full"
+                onError={() => setFallbackFailed(true)}
               />
             )
+          ) : fallbackFailed ? (
+            <div className="relative h-full w-full">
+              <img
+                src="/soon-placeholder.png"
+                alt="Bientot disponible"
+                className="h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/35" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <p className="rounded-full border border-white/20 bg-black/40 px-4 py-2 text-sm font-medium text-white/90">
+                  Video indisponible temporairement
+                </p>
+              </div>
+            </div>
           ) : (
             <div className="flex h-full items-center justify-center">
               <div className="text-center text-slate-400">
