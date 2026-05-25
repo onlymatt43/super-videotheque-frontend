@@ -5,7 +5,6 @@ import { useSession } from '../features/session/useSession';
 import type { Movie } from '../types';
 import { VideoModal } from '../components/VideoModal';
 import { createRental } from '../api/rentals';
-import { fetchCategories, type Category } from '../api/categories';
 import { AIChat } from '../components/AIChat';
 import { AccessManager } from '../components/AccessManager';
 import { PayhipForm } from '../components/PayhipForm';
@@ -65,6 +64,19 @@ const pickUrlFromPrivateItem = (item: PrivateFallbackItem): string | null => {
   return null;
 };
 
+const normalizeTag = (value: string) =>
+  String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '-');
+
+const formatTagLabel = (tag: string) =>
+  tag
+    .split('-')
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
+
 interface VideoState {
   open: boolean;
   movie?: Movie;
@@ -88,7 +100,6 @@ export const CatalogPage = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [chatInitialView, setChatInitialView] = useState<'chat' | 'survey'>('chat');
   const [prefillMessage, setPrefillMessage] = useState<string | undefined>(undefined);
-  const [categories, setCategories] = useState<Category[]>([]);
   const [showAddCode, setShowAddCode] = useState(false);
   const [liveFallbackSrc, setLiveFallbackSrc] = useState<string>(() => pickRandomFallback(parseFallbackUrls()));
 
@@ -96,7 +107,6 @@ export const CatalogPage = () => {
     if (!movies.length) {
       fetchCatalog();
     }
-    fetchCategories().then(setCategories).catch(console.error);
   }, [movies.length, fetchCatalog]);
 
   useEffect(() => {
@@ -149,27 +159,44 @@ export const CatalogPage = () => {
   //   return null;
   // }, [movies]);
 
-  // Group movies by category (dynamic) and filter by access
-  const moviesByCategory = useMemo(() => {
+  const accessibleMovies = useMemo(
+    () => movies.filter((m) => hasAccess(m._id, m.category)),
+    [movies, hasAccess]
+  );
+
+  // Tags-first grouping for catalog display.
+  const moviesByTag = useMemo(() => {
     const groups: Record<string, { label: string; movies: Movie[] }> = {};
-    
-    categories.forEach(cat => {
-      const catMovies = movies.filter(m => {
-        if (m.category !== cat.slug) return false;
-        return hasAccess(m._id, m.category);
-      });
-      if (catMovies.length > 0) {
-        groups[cat.slug] = { label: cat.label, movies: catMovies };
+
+    for (const movie of accessibleMovies) {
+      const rawTags = Array.isArray(movie.tags) ? movie.tags : [];
+      const normalizedTags = [...new Set(rawTags.map(normalizeTag).filter(Boolean))];
+
+      for (const tag of normalizedTags) {
+        if (!groups[tag]) {
+          groups[tag] = { label: formatTagLabel(tag), movies: [] };
+        }
+        groups[tag].movies.push(movie);
       }
-    });
-    
-    return groups;
-  }, [movies, categories, hasAccess]);
+    }
+
+    return Object.entries(groups)
+      .sort(([, a], [, b]) => {
+        if (b.movies.length !== a.movies.length) return b.movies.length - a.movies.length;
+        return a.label.localeCompare(b.label, 'fr');
+      })
+      .map(([tag, data]) => ({ tag, ...data }));
+  }, [accessibleMovies]);
+
+  const untaggedMovies = useMemo(
+    () => accessibleMovies.filter((movie) => !Array.isArray(movie.tags) || movie.tags.length === 0),
+    [accessibleMovies]
+  );
 
   // Recent movies (last 10) filtered by access
   const recentMovies = useMemo(() => 
-    movies.filter(m => hasAccess(m._id, m.category)).slice(0, 10),
-    [movies, hasAccess]
+    accessibleMovies.slice(0, 10),
+    [accessibleMovies]
   );
 
   const handleWatch = async (movie: Movie) => {
@@ -281,15 +308,23 @@ export const CatalogPage = () => {
         <Carousel title="Nouveautés" movies={recentMovies} onWatch={handleWatch} />
       )}
 
-      {/* Sections par catégorie */}
-      {!loading && Object.entries(moviesByCategory).map(([category, data]) => (
+      {/* Sections par tag */}
+      {!loading && moviesByTag.map(({ tag, label, movies: tagMovies }) => (
         <Carousel 
-          key={category} 
-          title={data.label} 
-          movies={data.movies} 
+          key={tag}
+          title={label}
+          movies={tagMovies}
           onWatch={handleWatch} 
         />
       ))}
+
+      {!loading && untaggedMovies.length > 0 && (
+        <Carousel
+          title="Sans tag"
+          movies={untaggedMovies}
+          onWatch={handleWatch}
+        />
+      )}
 
       <VideoModal
         open={videoState.open}
