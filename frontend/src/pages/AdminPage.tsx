@@ -4,6 +4,28 @@ import { fetchCategories, createCategory, updateCategory as updateCategoryApi, d
 import type { Category } from '../api/categories';
 import type { Movie } from '../types';
 
+const normalizeTags = (input: string): string[] => {
+  const seen = new Set<string>();
+  const tags: string[] = [];
+
+  for (const raw of input.split(',')) {
+    const clean = raw.trim().toLowerCase();
+    if (!clean || seen.has(clean)) continue;
+    seen.add(clean);
+    tags.push(clean);
+  }
+
+  return tags;
+};
+
+const areSameTags = (a: string[], b: string[]) => {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i += 1) {
+    if (a[i] !== b[i]) return false;
+  }
+  return true;
+};
+
 export const AdminPage = () => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -13,6 +35,7 @@ export const AdminPage = () => {
   const [tagFilter, setTagFilter] = useState<string | null>(null);
   const [showCategoryManager, setShowCategoryManager] = useState(false);
   const [newCategoryLabel, setNewCategoryLabel] = useState('');
+  const [bulkTagSaving, setBulkTagSaving] = useState(false);
 
   useEffect(() => {
     loadData();
@@ -58,7 +81,14 @@ export const AdminPage = () => {
   };
 
   const handleTagsChange = async (movieId: string, tagsString: string) => {
-    const tags = tagsString.split(',').map(t => t.trim().toLowerCase()).filter(t => t.length > 0);
+    const tags = normalizeTags(tagsString);
+    const currentMovie = movies.find((m) => m._id === movieId);
+    const currentTags = (currentMovie?.tags || []).map((t) => t.trim().toLowerCase());
+
+    if (areSameTags(currentTags, tags)) {
+      return;
+    }
+
     setSaving(movieId);
     try {
       const updated = await updateMovie(movieId, { tags });
@@ -86,6 +116,36 @@ export const AdminPage = () => {
       counts[cat.slug] = movies.filter(m => m.category === cat.slug).length;
     });
     return counts;
+  };
+
+  const handleNormalizeFilteredTags = async () => {
+    const updates = filteredMovies
+      .map((movie) => {
+        const normalized = normalizeTags((movie.tags || []).join(','));
+        const current = (movie.tags || []).map((t) => t.trim().toLowerCase());
+        return areSameTags(current, normalized)
+          ? null
+          : { movieId: movie._id, tags: normalized };
+      })
+      .filter((item): item is { movieId: string; tags: string[] } => Boolean(item));
+
+    if (updates.length === 0) return;
+
+    setBulkTagSaving(true);
+    try {
+      const updatedMovies = await Promise.all(
+        updates.map((item) => updateMovie(item.movieId, { tags: item.tags }))
+      );
+      const byId = new Map(updatedMovies.map((m) => [m._id, m]));
+      setMovies((prev) => prev.map((movie) => {
+        const updated = byId.get(movie._id);
+        return updated ? { ...movie, tags: updated.tags } : movie;
+      }));
+    } catch (error) {
+      console.error('Failed to normalize tags in bulk:', error);
+    } finally {
+      setBulkTagSaving(false);
+    }
   };
 
   const handleAddCategory = async () => {
@@ -228,7 +288,16 @@ export const AdminPage = () => {
         {/* Tags filter */}
         {allTags.length > 0 && (
           <div className="mb-6">
-            <span className="text-xs text-gray-400 mr-2">Tags:</span>
+            <div className="mb-2 flex items-center justify-between gap-3">
+              <span className="text-xs text-gray-400">Tags:</span>
+              <button
+                onClick={handleNormalizeFilteredTags}
+                disabled={bulkTagSaving}
+                className="rounded-full bg-[#1a2428] px-3 py-1 text-xs text-gray-300 transition-colors hover:bg-[#2a3438] disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {bulkTagSaving ? 'Nettoyage...' : 'Nettoyer tags affichés'}
+              </button>
+            </div>
             <div className="inline-flex flex-wrap gap-2">
               <button
                 onClick={() => setTagFilter(null)}
@@ -328,9 +397,15 @@ export const AdminPage = () => {
                 <div>
                   <label className="text-xs text-gray-400 block mb-1">Tags (séparés par virgule)</label>
                   <input
+                    key={`${movie._id}-${(movie.tags || []).join('|')}`}
                     type="text"
                     defaultValue={(movie.tags || []).join(', ')}
                     onBlur={(e) => handleTagsChange(movie._id, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        (e.target as HTMLInputElement).blur();
+                      }
+                    }}
                     disabled={saving === movie._id}
                     placeholder="featured, new, 4k..."
                     className="w-full bg-[#0a1214] border border-gray-600 rounded px-3 py-2 text-sm focus:border-[#ffd700] focus:outline-none"
