@@ -131,7 +131,7 @@ export const PayhipForm = () => {
               <span className="text-[10px] text-slate">via Payhip</span>
             </a>
             <a
-              href="https://nowpayments.io/payment?lid=5663208733"
+              href="https://nowpayments.io/payment?iid=6442288633"
               target="_blank"
               rel="noopener noreferrer"
               className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-2 py-3 text-center transition hover:border-ember hover:bg-ember/10"
