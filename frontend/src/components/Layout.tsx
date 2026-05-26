@@ -47,9 +47,11 @@ export const Layout = ({ children }: LayoutProps) => {
             <div className="mb-2 flex flex-wrap gap-x-4 gap-y-2">
               <Link to="/terms" className="hover:text-white">Terms of Service</Link>
               <Link to="/privacy" className="hover:text-white">Privacy Policy</Link>
-              <Link to="/refund" className="hover:text-white">Refund & Cancellation</Link>
+              <Link to="/refund" className="hover:text-white">Refund &amp; Cancellation</Link>
               <Link to="/adult-notice" className="hover:text-white">18+ Notice</Link>
               <Link to="/compliance" className="hover:text-white">2257 Compliance</Link>
+              <Link to="/dmca" className="hover:text-white">DMCA</Link>
+              <Link to="/aml" className="hover:text-white">AML Policy</Link>
             </div>
             <p className="leading-relaxed text-slate/80">
               Mathieu Courchesne - OM43 | theo43.team | contact@theom43.team | +1 929 812 1653

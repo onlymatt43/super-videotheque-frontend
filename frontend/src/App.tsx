@@ -9,6 +9,8 @@ import { AdultNoticePage } from './pages/AdultNoticePage';
 import { CompliancePage } from './pages/CompliancePage';
 import { AdminPage } from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
+import { DMCAPage } from './pages/DMCAPage';
+import { AMLPage } from './pages/AMLPage';
 import { Layout } from './components/Layout';
 import { useSession } from './features/session/useSession';
 import { useHideCursor } from './hooks/useHideCursor';
@@ -44,6 +46,8 @@ const App = () => {
         <Route path="/refund" element={<RefundPage />} />
         <Route path="/adult-notice" element={<AdultNoticePage />} />
         <Route path="/compliance" element={<CompliancePage />} />
+        <Route path="/dmca" element={<DMCAPage />} />
+        <Route path="/aml" element={<AMLPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/admin"
