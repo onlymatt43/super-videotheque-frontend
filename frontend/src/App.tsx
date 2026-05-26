@@ -3,11 +3,16 @@ import { LandingPage } from './pages/LandingPage';
 import { CatalogPage } from './pages/CatalogPage';
 import { QuestionsPage } from './pages/QuestionsPage';
 import { PrivacyPage } from './pages/PrivacyPage';
+import { TermsPage } from './pages/TermsPage';
+import { RefundPage } from './pages/RefundPage';
+import { AdultNoticePage } from './pages/AdultNoticePage';
+import { CompliancePage } from './pages/CompliancePage';
 import { AdminPage } from './pages/AdminPage';
 import LoginPage from './pages/LoginPage';
 import { Layout } from './components/Layout';
 import { useSession } from './features/session/useSession';
 import { useHideCursor } from './hooks/useHideCursor';
+import { hasAdminSessionToken } from './api/client';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { getActiveAccess } = useSession();
@@ -19,7 +24,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 const AdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = sessionStorage.getItem('admin_authenticated');
+  const isAuthenticated = hasAdminSessionToken();
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
@@ -35,6 +40,10 @@ const App = () => {
         <Route path="/" element={<LandingPage />} />
         <Route path="/questions" element={<QuestionsPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/refund" element={<RefundPage />} />
+        <Route path="/adult-notice" element={<AdultNoticePage />} />
+        <Route path="/compliance" element={<CompliancePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
           path="/admin"

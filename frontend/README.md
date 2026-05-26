@@ -4,6 +4,7 @@ Interface React + TypeScript + Vite, mobile-first et inspirée de Netflix pour p
 
 ## Fonctionnalités
 - Landing page sombre avec formulaire de validation Payhip + email.
+- Footer légal global avec liens: Terms, Privacy, Refund, 18+ Notice, 2257 Compliance.
 - Catalogue horizontal avec affiches, cartes glassmorphism et hover states.
 - Auto-play d'un aperçu vidéo 4 secondes après l'apparition d'une carte (IntersectionObserver + hook custom).
 - Intégration complète du backend :
@@ -13,6 +14,17 @@ Interface React + TypeScript + Vite, mobile-first et inspirée de Netflix pour p
 - Lecteur vidéo responsive (Radix Dialog + HTML5 video `playsInline`).
 - Zustand pour la session Payhip + location active + état des previews.
 - TailwindCSS + thème night/ember pour un design moderne type Netflix.
+
+## Conformité paiement et legal
+- Routes légales publiques:
+	- `/terms`
+	- `/privacy`
+	- `/refund`
+	- `/adult-notice`
+	- `/compliance`
+- Les mentions de transparence descriptor sont affichées sous l'action de paiement:
+	- CCBILL.COM pour la facturation CCBill
+	- GUARDARIAN/BANXA pour le flux carte via NOWPayments
 
 ## Déploiement Vercel
 

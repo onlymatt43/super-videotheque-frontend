@@ -1,0 +1,21 @@
+export const CompliancePage = () => {
+  return (
+    <div className="min-h-screen px-4 py-10 sm:px-6">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-black/30 p-6 backdrop-blur">
+        <h1 className="mb-4 text-2xl font-bold text-white">18 U.S.C. Section 2257 Compliance Statement</h1>
+        <p className="mb-4 text-slate"><strong>Last updated:</strong> May 25, 2026</p>
+        <div className="space-y-3 text-slate">
+          <p>
+            This website is a publisher/distributor of digital media content. With respect to all visual depictions displayed on this website, all persons portrayed were at least 18 years of age at the time the content was created.
+          </p>
+          <p>
+            [MATHIEU COURCHESNE - OM43] is not the primary producer of the visual content contained herein. All records required to be maintained under 18 U.S.C. § 2257 and equivalent international regulations are kept by the respective primary producers/content creators.
+          </p>
+          <p>
+            MATHIEU COURCHESNE - OM43 requires all content providers to certify and warrant that they maintain full compliance with age-verification and record-keeping laws prior to publishing any material.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
