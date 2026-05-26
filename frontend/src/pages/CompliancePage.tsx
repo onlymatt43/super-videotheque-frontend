@@ -6,13 +6,16 @@ export const CompliancePage = () => {
         <p className="mb-4 text-slate"><strong>Last updated:</strong> May 25, 2026</p>
         <div className="space-y-3 text-slate">
           <p>
-            This website is a publisher/distributor of digital media content. With respect to all visual depictions displayed on this website, all persons portrayed were at least 18 years of age at the time the content was created.
+            All individuals appearing in any visual depictions on this website were over the age of 18 years at the time the content was created.
           </p>
           <p>
-            [MATHIEU COURCHESNE - OM43] is not the primary producer of the visual content contained herein. All records required to be maintained under 18 U.S.C. § 2257 and equivalent international regulations are kept by the respective primary producers/content creators.
+            Although this platform is operated outside of the United States (in Quebec, Canada), it fully adheres to strict age-verification standards. All required records, including official government-issued identification documents and age certifications for all participating performers, are maintained by the primary producer and Custodian of Records at the headquarters of Mathieu Courchesne — OM43 in Quebec, Canada.
           </p>
           <p>
-            MATHIEU COURCHESNE - OM43 requires all content providers to certify and warrant that they maintain full compliance with age-verification and record-keeping laws prior to publishing any material.
+            MATHIEU COURCHESNE — OM43 requires all content providers to certify and warrant that they maintain full compliance with age-verification and record-keeping laws prior to publishing any material on this platform.
+          </p>
+          <p>
+            All records required to be maintained under 18 U.S.C. § 2257 and equivalent international regulations are kept by the respective primary producers and content creators of each work displayed herein.
           </p>
         </div>
       </div>

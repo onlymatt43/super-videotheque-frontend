@@ -6,14 +6,14 @@ export const RefundPage = () => {
         <p className="mb-4 text-slate"><strong>Last updated:</strong> May 25, 2026</p>
         <div className="mb-5 rounded-xl border border-amber-300/40 bg-amber-200/10 p-4 text-slate">
           <strong>
-            All purchases are for one-time digital access. There are no recurring charges or subscriptions associated with this purchase. Due to the immediate delivery of digital media, all sales are final.
+            All purchases made on this platform are for one-time digital access to media content. There are no recurring charges, memberships, or hidden subscriptions associated with these transactions. Due to the immediate and digital nature of the content delivery, all sales are final and non-refundable. If you experience any technical issues accessing your purchase, please contact our support at contact@theom43.team.
           </strong>
         </div>
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">No Recurring Billing</h2>
-        <p className="text-slate">Current purchase flow is one-time only, with no subscription renewal cycle.</p>
+        <p className="text-slate">Every purchase is a single, one-time transaction. There are no subscriptions, auto-renewals, or recurring charges of any kind.</p>
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Support and Billing Issues</h2>
         <p className="text-slate">
-          If you believe a transaction was duplicated or processed in error, contact support with transaction details before filing a bank dispute.
+          If you believe a transaction was processed in error or you are experiencing technical difficulties accessing your purchase, contact support before filing a bank dispute. We are committed to resolving issues promptly.
         </p>
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Contact</h2>
         <p className="text-slate leading-relaxed">

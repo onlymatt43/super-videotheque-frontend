@@ -83,7 +83,7 @@ export const PayhipForm = () => {
         By clicking Proceed to Payment, you agree that your transaction will be securely processed by our authorized billing partner, CCBill. The descriptor <strong>CCBILL.COM</strong> will appear on your bank statement for this one-time purchase.
       </p>
       <p className="mt-2 text-xs leading-relaxed text-slate/90">
-        Card payments are securely processed and converted via our NOWPayments gateway. Depending on your choice, <strong>GUARDARIAN</strong> or <strong>BANXA</strong> will appear as the merchant descriptor on your bank statement.
+        Payments are processed securely via NOWPayments. Your digital assets will be transferred directly from your wallet to our secure corporate storage. Transactions on the blockchain are final.
       </p>
       {status === 'success' && <p className="mt-4 text-center text-sm text-green-400">Code ajouté avec succès !</p>}
     </form>
