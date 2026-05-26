@@ -42,7 +42,7 @@ export const Layout = ({ children }: LayoutProps) => {
       )}
       <main className={isEmbed ? "mx-auto max-w-6xl px-0 pb-0 pt-0" : "mx-auto max-w-6xl px-3 sm:px-4 pb-16 pt-4 sm:pt-6"}>{children}</main>
       {!isEmbed && (
-        <footer className="border-t border-white/10 bg-black/30">
+        <footer className="relative z-10 border-t border-white/10 bg-black/30">
           <div className="mx-auto max-w-6xl px-3 py-5 text-xs text-slate sm:px-4">
             <div className="mb-2 flex flex-wrap gap-x-4 gap-y-2">
               <Link to="/terms" className="hover:text-white">Terms of Service</Link>
