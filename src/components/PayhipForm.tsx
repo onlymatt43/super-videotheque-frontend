@@ -139,11 +139,24 @@ export const PayhipForm = () => {
               <span className="text-xs font-semibold uppercase tracking-widest text-white">Crypto</span>
               <span className="text-[10px] text-slate">via NOWPayments</span>
             </a>
-            <div className="flex flex-col items-center gap-1 rounded-xl border border-white/5 bg-white/[0.02] px-2 py-3 text-center opacity-50 cursor-not-allowed">
-              <span className="text-xs font-semibold uppercase tracking-widest text-white">Card</span>
-              <span className="text-[10px] text-slate">via CCBill</span>
-              <span className="text-[9px] text-amber-400">Coming soon</span>
-            </div>
+            {/* CCBill tile — set VITE_CCBILL_ENABLED=true in .env once the account is approved */}
+            {import.meta.env.VITE_CCBILL_ENABLED === 'true' ? (
+              <a
+                href={`${import.meta.env.VITE_API_URL ?? 'https://super-videotheque-api.onrender.com'}/api/ccbill/checkout?type=onetime`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-2 py-3 text-center transition hover:border-ember hover:bg-ember/10"
+              >
+                <span className="text-xs font-semibold uppercase tracking-widest text-white">Card</span>
+                <span className="text-[10px] text-slate">via CCBill</span>
+              </a>
+            ) : (
+              <div className="flex flex-col items-center gap-1 rounded-xl border border-white/5 bg-white/[0.02] px-2 py-3 text-center opacity-50 cursor-not-allowed">
+                <span className="text-xs font-semibold uppercase tracking-widest text-white">Card</span>
+                <span className="text-[10px] text-slate">via CCBill</span>
+                <span className="text-[9px] text-amber-400">Coming soon</span>
+              </div>
+            )}
           </div>
 
           <div className="mb-5 flex items-center gap-3">
