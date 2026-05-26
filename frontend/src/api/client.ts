@@ -1,5 +1,8 @@
 import axios from 'axios';
 
+const ADMIN_TOKEN_KEY = 'admin_auth_token';
+const ADMIN_AUTH_FLAG_KEY = 'admin_authenticated';
+
 const baseURL = import.meta.env.VITE_API_BASE_URL;
 
 if (!baseURL) {
@@ -17,6 +20,31 @@ export const apiClient = axios.create({
   }
 });
 
+export const setAdminSessionToken = (token: string) => {
+  sessionStorage.setItem(ADMIN_TOKEN_KEY, token);
+  sessionStorage.setItem(ADMIN_AUTH_FLAG_KEY, 'true');
+};
+
+export const clearAdminSessionToken = () => {
+  sessionStorage.removeItem(ADMIN_TOKEN_KEY);
+  sessionStorage.removeItem(ADMIN_AUTH_FLAG_KEY);
+};
+
+export const hasAdminSessionToken = () =>
+  Boolean(sessionStorage.getItem(ADMIN_TOKEN_KEY) || sessionStorage.getItem(ADMIN_AUTH_FLAG_KEY));
+
+const isAdminProtectedMutation = (method?: string, url?: string) => {
+  if (!method || !url) return false;
+  const normalizedMethod = method.toLowerCase();
+  if (!['post', 'patch', 'delete'].includes(normalizedMethod)) return false;
+
+  return (
+    url.startsWith('/api/admin') ||
+    url.startsWith('/api/movies') ||
+    url.startsWith('/api/categories')
+  );
+};
+
 apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -25,14 +53,10 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Add admin authentication header if password is set
-const adminPassword = import.meta.env.VITE_ADMIN_PASSWORD;
-if (adminPassword) {
-  apiClient.interceptors.request.use((config) => {
-    // Only add auth header for admin routes (POST, PATCH, DELETE)
-    if (config.method && ['post', 'patch', 'delete'].includes(config.method.toLowerCase())) {
-      config.headers.Authorization = `Bearer ${adminPassword}`;
-    }
-    return config;
-  });
-}
+apiClient.interceptors.request.use((config) => {
+  const token = sessionStorage.getItem(ADMIN_TOKEN_KEY);
+  if (token && isAdminProtectedMutation(config.method, config.url)) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});

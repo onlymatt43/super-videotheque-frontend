@@ -1,11 +1,12 @@
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { hasAdminSessionToken } from '../api/client';
 
 export function useRequireAuth() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const isAuthenticated = sessionStorage.getItem('admin_authenticated');
+    const isAuthenticated = hasAdminSessionToken();
     
     if (!isAuthenticated) {
       navigate('/login');
