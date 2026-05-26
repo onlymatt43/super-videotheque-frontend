@@ -6,7 +6,7 @@ export const AMLPage = () => {
         <p className="mb-4 text-slate"><strong>Last updated:</strong> May 26, 2026</p>
 
         <p className="mb-4 text-slate">
-          Mathieu Courchesne — OM43 is committed to preventing money laundering, terrorist financing,
+          OM43 is committed to preventing money laundering, terrorist financing,
           and other financial crimes. This policy applies to all cryptocurrency transactions processed
           through our authorized payment partner, NOWPayments.
         </p>
@@ -67,8 +67,7 @@ export const AMLPage = () => {
         <p className="text-slate leading-relaxed">
           For AML-related inquiries or to report suspicious activity:<br />
           Email: <a href="mailto:contact@theom43.team" className="text-ember hover:underline">contact@theom43.team</a><br />
-          Mathieu Courchesne — OM43<br />
-          1442 PIE-IX, H1V2C1, Montréal, Québec, Canada
+
         </p>
       </div>
     </div>

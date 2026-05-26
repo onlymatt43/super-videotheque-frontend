@@ -6,7 +6,7 @@ export const TermsPage = () => {
         <p className="mb-4 text-slate"><strong>Last updated:</strong> May 26, 2026</p>
         <p className="mb-4 text-slate">
           These Terms govern access to and use of this website and all related digital content services
-          operated by Mathieu Courchesne — OM43 (&quot;Company&quot;, &quot;we&quot;, &quot;us&quot;, &quot;our&quot;).
+          operated by OM43 (&quot;Company&quot;, &quot;we&quot;, &quot;us&quot;, &quot;our&quot;).
           By accessing this website, you confirm that you have read, understood, and agree to be bound by these Terms.
         </p>
 
@@ -67,7 +67,7 @@ export const TermsPage = () => {
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">6. Intellectual Property</h2>
         <p className="text-slate">
           All videos, images, branding, and related materials are the exclusive property of
-          Mathieu Courchesne — OM43 and are protected by applicable copyright and intellectual property laws.
+          OM43 and are protected by applicable copyright and intellectual property laws.
           No license is granted for commercial use, redistribution, or derivative works.
         </p>
 
@@ -103,11 +103,8 @@ export const TermsPage = () => {
 
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Contact &amp; Customer Support</h2>
         <p className="text-slate leading-relaxed">
-          Mathieu Courchesne — OM43<br />
           Website: <a href="https://video.onlymatt.ca" className="text-ember hover:underline">video.onlymatt.ca</a><br />
           Email: <a href="mailto:contact@theom43.team" className="text-ember hover:underline">contact@theom43.team</a><br />
-          Phone: +1 929 812 1653<br />
-          Address: 1442 PIE-IX, H1V2C1, Montréal, Québec, Canada<br />
           <span className="text-slate/70 text-xs">Response time: within 2 business days.</span>
         </p>
       </div>

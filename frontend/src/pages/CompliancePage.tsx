@@ -9,10 +9,10 @@ export const CompliancePage = () => {
             All individuals appearing in any visual depictions on this website were over the age of 18 years at the time the content was created.
           </p>
           <p>
-            Although this platform is operated outside of the United States (in Quebec, Canada), it fully adheres to strict age-verification standards. All required records, including official government-issued identification documents and age certifications for all participating performers, are maintained by the primary producer and Custodian of Records at the headquarters of Mathieu Courchesne — OM43 in Quebec, Canada.
+            Although this platform is operated outside of the United States (in Quebec, Canada), it fully adheres to strict age-verification standards. All required records, including official government-issued identification documents and age certifications for all participating performers, are maintained by the primary producer and Custodian of Records at the headquarters of OM43 in Quebec, Canada.
           </p>
           <p>
-            MATHIEU COURCHESNE — OM43 requires all content providers to certify and warrant that they maintain full compliance with age-verification and record-keeping laws prior to publishing any material on this platform.
+            OM43 requires all content providers to certify and warrant that they maintain full compliance with age-verification and record-keeping laws prior to publishing any material on this platform.
           </p>
           <p>
             All records required to be maintained under 18 U.S.C. § 2257 and equivalent international regulations are kept by the respective primary producers and content creators of each work displayed herein.

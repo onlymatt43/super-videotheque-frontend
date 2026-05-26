@@ -6,7 +6,7 @@ export const DMCAPage = () => {
         <p className="mb-4 text-slate"><strong>Last updated:</strong> May 26, 2026</p>
 
         <p className="mb-4 text-slate">
-          Mathieu Courchesne — OM43 respects intellectual property rights and complies with the
+          OM43 respects intellectual property rights and complies with the
           Digital Millennium Copyright Act (DMCA) and equivalent international copyright laws.
           We respond promptly to valid takedown notices and take copyright infringement seriously.
         </p>
@@ -31,13 +31,12 @@ export const DMCAPage = () => {
 
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Designated Copyright Agent</h2>
         <div className="rounded-xl border border-white/10 bg-white/5 p-4 text-slate">
-          <p className="font-semibold text-white">Mathieu Courchesne — OM43</p>
+          <p className="font-semibold text-white">OM43</p>
           <p>DMCA Agent / Copyright Compliance Officer</p>
           <p className="mt-2">
             Email: <a href="mailto:dmca@theom43.team" className="text-ember hover:underline">dmca@theom43.team</a>
           </p>
-          <p>Phone: +1 929 812 1653</p>
-          <p>Address: 1442 PIE-IX, H1V2C1, Montréal, Québec, Canada</p>
+          <p>Montréal, Québec, Canada</p>
         </div>
 
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Counter-Notice</h2>
@@ -60,7 +59,7 @@ export const DMCAPage = () => {
           For content removal requests unrelated to copyright (e.g., unauthorized publication of
           personal images), please contact <a href="mailto:contact@theom43.team" className="text-ember hover:underline">contact@theom43.team</a>.
           All performers appearing on this platform have provided documented, written consent.
-          Records are maintained by Mathieu Courchesne — OM43 in accordance with applicable law.
+          Records are maintained by OM43 in accordance with applicable law.
         </p>
 
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Response Time</h2>

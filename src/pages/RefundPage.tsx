@@ -50,9 +50,7 @@ export const RefundPage = () => {
 
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Contact &amp; Customer Support</h2>
         <p className="text-slate leading-relaxed">
-          Mathieu Courchesne — OM43<br />
           Email: <a href="mailto:contact@theom43.team" className="text-ember hover:underline">contact@theom43.team</a><br />
-          Phone: +1 929 812 1653<br />
           <span className="text-slate/70 text-xs">Response time: within 2 business days.</span>
         </p>
       </div>

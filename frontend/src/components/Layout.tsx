@@ -54,9 +54,7 @@ export const Layout = ({ children }: LayoutProps) => {
               <Link to="/aml" className="hover:text-white">AML Policy</Link>
             </div>
             <p className="leading-relaxed text-slate/80">
-              Mathieu Courchesne - OM43 | theo43.team | contact@theom43.team | +1 929 812 1653
-              <br />
-              1442 PIE-IX H1V2C1 MONTREAL QUEBEC CANADA
+              OM43 &middot; theom43.team &middot; contact@theom43.team
             </p>
           </div>
         </footer>

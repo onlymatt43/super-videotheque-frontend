@@ -5,7 +5,7 @@ export const PrivacyPage = () => {
         <h1 className="text-2xl font-bold text-white mb-4">Privacy Policy</h1>
         <p className="text-slate mb-4"><strong>Last updated:</strong> May 26, 2026</p>
         <p className="text-slate mb-4">
-          This Privacy Policy explains how Mathieu Courchesne — OM43 (&quot;Company&quot;, &quot;we&quot;, &quot;us&quot;, &quot;our&quot;)
+          This Privacy Policy explains how OM43 (&quot;Company&quot;, &quot;we&quot;, &quot;us&quot;, &quot;our&quot;)
           collects, uses, and protects personal information when you use this website and related services.
         </p>
 
@@ -86,10 +86,7 @@ export const PrivacyPage = () => {
 
         <h2 className="text-xl font-semibold text-white mt-6 mb-2">Contact</h2>
         <p className="text-slate leading-relaxed">
-          Mathieu Courchesne — OM43<br />
-          Email: <a href="mailto:contact@theom43.team" className="text-ember hover:underline">contact@theom43.team</a><br />
-          Phone: +1 929 812 1653<br />
-          Address: 1442 PIE-IX, H1V2C1, Montréal, Québec, Canada
+          Email: <a href="mailto:contact@theom43.team" className="text-ember hover:underline">contact@theom43.team</a>
         </p>
       </div>
     </div>
