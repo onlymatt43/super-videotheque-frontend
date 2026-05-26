@@ -38,14 +38,40 @@ export const PayhipForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="glass-panel w-full max-w-xl rounded-2xl p-6 backdrop-blur">
-      <a 
-        href="https://payhip.com/storebytheom43team" 
-        target="_blank" 
-        rel="noopener noreferrer"
-        className="mb-6 block text-sm uppercase tracking-[0.4em] text-ember hover:text-yellow-400 transition-colors"
-      >
-        Get Your Code →
-      </a>
+      {/* Purchase options */}
+      <p className="mb-3 text-xs uppercase tracking-[0.4em] text-slate">Get Your Code</p>
+      <div className="mb-6 grid grid-cols-3 gap-2">
+        <a
+          href="https://payhip.com/storebytheom43team"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-2 py-3 text-center transition hover:border-ember hover:bg-ember/10"
+        >
+          <span className="text-xs font-semibold uppercase tracking-widest text-white">Card</span>
+          <span className="text-[10px] text-slate">via Payhip</span>
+        </a>
+        <a
+          href="https://nowpayments.io/payment?lid=5663208733"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex flex-col items-center gap-1 rounded-xl border border-white/10 bg-white/5 px-2 py-3 text-center transition hover:border-ember hover:bg-ember/10"
+        >
+          <span className="text-xs font-semibold uppercase tracking-widest text-white">Crypto</span>
+          <span className="text-[10px] text-slate">via NOWPayments</span>
+        </a>
+        <div className="flex flex-col items-center gap-1 rounded-xl border border-white/5 bg-white/[0.02] px-2 py-3 text-center opacity-50 cursor-not-allowed">
+          <span className="text-xs font-semibold uppercase tracking-widest text-white">Card</span>
+          <span className="text-[10px] text-slate">via CCBill</span>
+          <span className="text-[9px] text-amber-400">Coming soon</span>
+        </div>
+      </div>
+
+      <div className="mb-5 flex items-center gap-3">
+        <div className="h-px flex-1 bg-white/10" />
+        <span className="text-[10px] uppercase tracking-[0.3em] text-slate">Already have a code?</span>
+        <div className="h-px flex-1 bg-white/10" />
+      </div>
+
       <div className="mb-4">
         <input
           type="text"
