@@ -49,9 +49,11 @@ export const TermsPage = () => {
 
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">4. Subscriptions</h2>
         <p className="text-slate">
-          Annual subscriptions (&quot;All Year Long&quot; plan at USD 300/year) are paid in full upfront
-          via cryptocurrency through NOWPayments. There are no automatic renewals — each subscription
-          period requires a new manual payment. Individual per-title purchases have no recurring component.
+          Subscription plans (e.g. &quot;All Year Long&quot; at USD 300/year) are paid in full upfront
+          via cryptocurrency through NOWPayments. Plan formats and pricing may evolve over time.
+          There are no automatic renewals — each subscription period requires a new manual payment.
+          Time-limited access purchases (e.g. 1-hour streaming via Payhip or CCBill) are single
+          non-recurring transactions with no recurring component.
         </p>
 
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">5. Refunds &amp; Cancellations</h2>

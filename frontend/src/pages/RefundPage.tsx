@@ -15,12 +15,13 @@ export const RefundPage = () => {
           </strong>
         </div>
 
-        <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Per-Title Purchases (Card / Payhip)</h2>
+        <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Time-Limited Access Purchases (Card / Payhip / CCBill)</h2>
         <p className="text-slate">
-          Single-title purchases are one-time, non-recurring transactions. There are no automatic renewals,
-          hidden subscriptions, or recurring charges associated with per-title purchases.
+          Time-limited access purchases (e.g. 1-hour streaming access via Payhip gift card) are one-time,
+          non-recurring transactions. There are no automatic renewals, hidden subscriptions, or recurring
+          charges associated with these purchases.
           The descriptor <strong className="text-white">CCBILL.COM</strong> or{' '}
-          <strong className="text-white">PAYHIP.COM</strong> will appear on your statement for these transactions.
+          <strong className="text-white">PAYHIP.COM</strong> will appear on your statement depending on the payment method used.
         </p>
 
         <h2 className="mb-2 mt-6 text-xl font-semibold text-white">Annual Subscription (Cryptocurrency)</h2>
