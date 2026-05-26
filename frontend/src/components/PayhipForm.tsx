@@ -80,7 +80,10 @@ export const PayhipForm = () => {
         )}
       </button>
       <p className="mt-3 text-xs leading-relaxed text-slate">
-        Payments are processed securely by <strong>Payhip</strong>. The descriptor <strong>PAYHIP</strong> will appear on your bank statement for this purchase.
+        By clicking Proceed to Payment, you agree that your transaction will be securely processed by our authorized billing partner, CCBill. The descriptor <strong>CCBILL.COM</strong> will appear on your bank statement for this one-time purchase.
+      </p>
+      <p className="mt-2 text-xs leading-relaxed text-slate/90">
+        Card payments are securely processed and converted via our NOWPayments gateway. Depending on your choice, <strong>GUARDARIAN</strong> or <strong>BANXA</strong> will appear as the merchant descriptor on your bank statement.
       </p>
       {status === 'success' && <p className="mt-4 text-center text-sm text-green-400">Code ajouté avec succès !</p>}
     </form>
